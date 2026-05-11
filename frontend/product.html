@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Product - FreshVeg</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    .product-detail-layout { display: grid; grid-template-columns: 1fr 1fr; gap: 48px; padding: 40px 0; align-items: start; }
+    .product-gallery { position: sticky; top: 140px; }
+    .product-main-img { background: linear-gradient(135deg, #f0f9f3, #e8f5ee); border-radius: var(--radius-xl); height: 380px; display: flex; align-items: center; justify-content: center; font-size: 140px; margin-bottom: 16px; box-shadow: var(--shadow); }
+    .product-info h1 { font-size: 28px; font-weight: 800; margin-bottom: 8px; line-height: 1.2; }
+    .product-meta { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; margin-bottom: 20px; }
+    .product-badges { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 20px; }
+    .product-big-price { font-size: 36px; font-weight: 900; color: var(--primary-dark); }
+    .product-big-mrp { font-size: 18px; color: var(--text-muted); text-decoration: line-through; margin-left: 10px; }
+    .product-big-discount { font-size: 14px; font-weight: 700; color: var(--error); background: rgba(239,68,68,.1); padding: 4px 12px; border-radius: var(--radius-full); margin-left: 8px; }
+    .product-pricing-row { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; margin-bottom: 24px; }
+    .qty-picker { display: flex; align-items: center; gap: 12px; background: var(--bg); padding: 8px 16px; border-radius: var(--radius); border: 2px solid var(--border); width: fit-content; margin-bottom: 16px; }
+    .qty-picker-btn { width: 32px; height: 32px; border-radius: 50%; background: var(--primary); color: white; border: none; font-size: 20px; cursor: pointer; display: flex; align-items: center; justify-content: center; font-weight: 700; }
+    .qty-picker-value { font-size: 18px; font-weight: 700; min-width: 36px; text-align: center; }
+    .action-row { display: flex; gap: 12px; margin-bottom: 24px; }
+    .btn-add-cart { flex: 2; padding: 14px; font-size: 16px; font-weight: 700; background: var(--primary); color: white; border: none; border-radius: var(--radius-lg); cursor: pointer; transition: var(--transition); }
+    .btn-add-cart:hover { background: var(--primary-dark); }
+    .btn-wishlist-big { flex: 1; padding: 14px; font-size: 16px; background: white; color: var(--text-primary); border: 2px solid var(--border); border-radius: var(--radius-lg); cursor: pointer; transition: var(--transition); }
+    .btn-wishlist-big:hover { border-color: var(--error); color: var(--error); }
+    .product-desc-section { background: white; border-radius: var(--radius-lg); padding: 24px; margin-bottom: 16px; box-shadow: var(--shadow-sm); }
+    .product-desc-section h3 { font-size: 16px; font-weight: 700; margin-bottom: 12px; color: var(--primary-dark); }
+    .product-desc-section p { font-size: 14px; color: var(--text-secondary); line-height: 1.7; }
+    .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 12px; }
+    .info-item { background: var(--bg); padding: 10px 14px; border-radius: var(--radius); }
+    .info-item span { display: block; font-size: 11px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 2px; }
+    .info-item strong { font-size: 14px; font-weight: 600; }
+    .reviews-section { padding: 40px 0; }
+    .review-card { background: white; border-radius: var(--radius-lg); padding: 20px; margin-bottom: 12px; box-shadow: var(--shadow-sm); }
+    .review-header { display: flex; align-items: center; gap: 12px; margin-bottom: 10px; }
+    .review-avatar { width: 38px; height: 38px; border-radius: 50%; background: linear-gradient(135deg, var(--primary), var(--primary-light)); color: white; font-weight: 700; display: flex; align-items: center; justify-content: center; }
+    .review-meta strong { display: block; font-size: 14px; }
+    .review-meta span { font-size: 12px; color: var(--text-secondary); }
+    .review-title { font-size: 15px; font-weight: 600; margin-bottom: 6px; }
+    .review-text { font-size: 14px; color: var(--text-secondary); line-height: 1.6; }
+    .write-review { background: white; border-radius: var(--radius-xl); padding: 28px; box-shadow: var(--shadow-sm); margin-bottom: 24px; }
+    .related-section { padding-bottom: 60px; }
+    @media (max-width: 768px) {
+      .product-detail-layout { grid-template-columns: 1fr; gap: 24px; }
+      .product-gallery { position: static; }
+    }
+  </style>
+</head>
+<body>
+  <nav class="navbar" id="navbar">
+    <div class="nav-container">
+      <a href="index.html" class="nav-brand"><span class="brand-icon">🥦</span><span class="brand-name">FreshVeg</span></a>
+      <div class="nav-search"><div class="search-box"><span class="search-icon">🔍</span><input type="text" id="globalSearch" placeholder="Search vegetables..." autocomplete="off"><div class="search-dropdown" id="searchDropdown"></div></div></div>
+      <div class="nav-actions">
+        <a href="products.html" class="nav-link">🛍️ Shop</a>
+        <a href="cart.html" class="nav-link cart-link">🛒 Cart<span class="cart-badge" id="cartBadge" style="display:none">0</span></a>
+        <div class="nav-user" id="navUser">
+          <a href="auth.html" class="btn btn-primary btn-sm" id="loginBtn">Login</a>
+          <div class="user-dropdown" id="userDropdown" style="display:none">
+            <button class="user-avatar" id="userAvatarBtn"><span id="userInitial">U</span></button>
+            <div class="dropdown-menu" id="dropdownMenu">
+              <div class="dropdown-header"><strong id="dropdownName">User</strong><small id="dropdownEmail"></small></div>
+              <a href="orders.html" class="dropdown-item">📦 My Orders</a>
+              <a href="wishlist.html" class="dropdown-item">❤️ Wishlist</a>
+              <a href="profile.html" class="dropdown-item">👤 Profile</a>
+              <hr><button class="dropdown-item logout-btn" id="logoutBtn">🚪 Logout</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="delivery-bar"><div class="delivery-container"><span class="delivery-info">📍 Mumbai - 400001</span></div></div>
+  </nav>
+
+  <div class="container">
+    <div style="padding:16px 0">
+      <div class="breadcrumb" style="color:var(--text-secondary)">
+        <a href="index.html" style="color:var(--primary)">Home</a>
+        <span class="breadcrumb-sep">›</span>
+        <a href="products.html" style="color:var(--primary)">Shop</a>
+        <span class="breadcrumb-sep">›</span>
+        <span id="breadcrumbProduct">Product</span>
+      </div>
+    </div>
+
+    <div id="productDetail">
+      <div style="text-align:center;padding:60px">
+        <div class="skeleton-card" style="height:400px;border-radius:24px"></div>
+      </div>
+    </div>
+
+    <!-- Reviews Section -->
+    <div class="reviews-section" id="reviewsSection" style="display:none">
+      <h2 class="section-title" style="margin-bottom:24px">Customer Reviews</h2>
+
+      <!-- Write Review -->
+      <div class="write-review" id="writeReview" style="display:none">
+        <h3 style="margin-bottom:16px">Write a Review</h3>
+        <div class="form-group">
+          <label class="form-label">Your Rating</label>
+          <div style="font-size:32px;cursor:pointer" id="starPicker">
+            <span class="star" data-val="1" onclick="setRating(1)">☆</span>
+            <span class="star" data-val="2" onclick="setRating(2)">☆</span>
+            <span class="star" data-val="3" onclick="setRating(3)">☆</span>
+            <span class="star" data-val="4" onclick="setRating(4)">☆</span>
+            <span class="star" data-val="5" onclick="setRating(5)">☆</span>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Review Title</label>
+          <input type="text" class="form-input" id="reviewTitle" placeholder="Summarize your experience">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Your Review</label>
+          <textarea class="form-textarea" id="reviewComment" rows="4" placeholder="Tell us about the freshness, quality, and your experience..."></textarea>
+        </div>
+        <button class="btn btn-primary" onclick="submitReview()">Submit Review</button>
+      </div>
+
+      <div id="reviewsList"></div>
+    </div>
+
+    <!-- Related Products -->
+    <div class="related-section" id="relatedSection" style="display:none">
+      <h2 class="section-title" style="margin-bottom:24px">You May Also Like</h2>
+      <div class="products-grid" id="relatedGrid"></div>
+    </div>
+  </div>
+
+  <div class="toast-container" id="toastContainer"></div>
+
+  <script src="js/api.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/cart.js"></script>
+  <script>
+    let currentProduct = null;
+    let selectedQty = 1;
+    let selectedRating = 0;
+
+    document.addEventListener('DOMContentLoaded', async () => {
+      const slug = new URLSearchParams(window.location.search).get('slug');
+      if (!slug) return window.location.href = 'products.html';
+      await loadProduct(slug);
+    });
+
+    async function loadProduct(slug) {
+      const { ok, data } = await api.get(`/products/${slug}`);
+      if (!ok || !data.product) {
+        document.getElementById('productDetail').innerHTML = '<div class="empty-state"><div class="empty-icon">🔍</div><h3 class="empty-title">Product Not Found</h3><a href="products.html" class="btn btn-primary">Browse Products</a></div>';
+        return;
+      }
+      currentProduct = data.product;
+      document.title = `${data.product.name} - FreshVeg`;
+      document.getElementById('breadcrumbProduct').textContent = data.product.name;
+      renderProduct(data.product);
+      renderReviews(data.reviews, data.product.id);
+      renderRelated(data.related);
+    }
+
+    function renderProduct(p) {
+      const emoji = getVeggieEmoji(p.name);
+      const discount = p.discount_percent > 0 ? `<span class="product-big-discount">${Math.round(p.discount_percent)}% OFF</span>` : '';
+      const wishIcon = p.is_wishlisted ? '❤️' : '🤍';
+
+      document.getElementById('productDetail').innerHTML = `
+        <div class="product-detail-layout">
+          <div class="product-gallery">
+            <div class="product-main-img">${emoji}</div>
+            <div style="display:flex;gap:8px;justify-content:center">
+              ${p.is_organic ? '<span class="product-badge badge-organic" style="position:static;display:inline-block">🌱 Certified Organic</span>' : ''}
+              <span class="product-badge badge-fresh" style="position:static;display:inline-block">✅ Quality Tested</span>
+            </div>
+          </div>
+          <div class="product-info">
+            <div class="product-meta">
+              <a href="products.html?category=${p.category_slug}" style="font-size:13px;color:var(--primary);font-weight:600;background:var(--primary-pale);padding:4px 12px;border-radius:20px">${p.category_name}</a>
+              <span style="font-size:12px;color:var(--text-muted)">Origin: ${p.origin || 'India'}</span>
+            </div>
+            <h1>${p.name}</h1>
+            <div style="display:flex;align-items:center;gap:8px;margin-bottom:16px">
+              <div class="stars-display" style="font-size:18px">${renderStars(p.rating, 18)}</div>
+              <strong style="font-size:16px">${parseFloat(p.rating).toFixed(1)}</strong>
+              <span style="color:var(--text-secondary);font-size:14px">(${p.review_count} reviews)</span>
+            </div>
+            <div class="product-pricing-row">
+              <span class="product-big-price">${formatCurrency(p.price)}</span>
+              <span style="font-size:14px;color:var(--text-secondary)">per ${p.unit}</span>
+              ${p.mrp > p.price ? `<span class="product-big-mrp">${formatCurrency(p.mrp)}</span>${discount}` : ''}
+            </div>
+            <div style="background:var(--primary-pale);padding:12px 16px;border-radius:var(--radius);margin-bottom:20px;font-size:13px;color:var(--primary-dark)">
+              🚀 <strong>Estimated Delivery:</strong> Within 2 hours • 🚚 Free delivery on orders above ₹500
+            </div>
+            <div style="margin-bottom:16px">
+              <label style="font-size:13px;font-weight:600;color:var(--text-secondary);text-transform:uppercase;letter-spacing:0.5px">Quantity (${p.unit})</label>
+              <div class="qty-picker" style="margin-top:8px">
+                <button class="qty-picker-btn" onclick="changeQty(-1)">−</button>
+                <span class="qty-picker-value" id="qtyDisplay">1</span>
+                <button class="qty-picker-btn" onclick="changeQty(1)">+</button>
+                <span style="font-size:13px;color:var(--text-secondary);margin-left:8px">${p.unit} • Stock: ${p.stock_quantity}</span>
+              </div>
+            </div>
+            <div class="action-row">
+              <button class="btn-add-cart" onclick="addToCartProduct()">🛒 Add to Cart</button>
+              <button class="btn-wishlist-big" id="wishlistBtnBig" onclick="toggleWishlistProduct()">
+                ${wishIcon} Wishlist
+              </button>
+            </div>
+
+            <div class="product-desc-section">
+              <h3>📋 Product Description</h3>
+              <p>${p.description || p.short_description || ''}</p>
+              <div class="info-grid" style="margin-top:16px">
+                <div class="info-item"><span>Freshness</span><strong>🗓️ ${p.freshness_days} days</strong></div>
+                <div class="info-item"><span>Origin</span><strong>📍 ${p.origin || 'India'}</strong></div>
+                <div class="info-item"><span>Type</span><strong>${p.is_organic ? '🌱 Organic' : '🥗 Regular'}</strong></div>
+                <div class="info-item"><span>Unit</span><strong>⚖️ Per ${p.unit}</strong></div>
+              </div>
+            </div>
+
+            <div style="background:white;border-radius:var(--radius-lg);padding:16px;box-shadow:var(--shadow-sm)">
+              <div style="display:flex;gap:16px;flex-wrap:wrap">
+                <span style="font-size:13px;display:flex;align-items:center;gap:6px">✅ Quality Guaranteed</span>
+                <span style="font-size:13px;display:flex;align-items:center;gap:6px">🔄 Easy Returns</span>
+                <span style="font-size:13px;display:flex;align-items:center;gap:6px">🛡️ Secure Payment</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    function changeQty(delta) {
+      const maxStock = currentProduct?.stock_quantity || 100;
+      selectedQty = Math.max(1, Math.min(selectedQty + delta, maxStock));
+      document.getElementById('qtyDisplay').textContent = selectedQty;
+    }
+
+    async function addToCartProduct() {
+      if (!requireAuth()) return;
+      const { ok, data } = await api.post('/cart/add', { product_id: currentProduct.id, quantity: selectedQty });
+      if (ok && data.success) {
+        showToast(`🛒 ${currentProduct.name} added to cart!`, 'success');
+        updateCartBadge(data.cart_count);
+      } else showToast(data.message || 'Failed to add', 'error');
+    }
+
+    async function toggleWishlistProduct() {
+      if (!requireAuth()) return;
+      const { ok, data } = await api.post('/cart/wishlist/toggle', { product_id: currentProduct.id });
+      if (ok) {
+        const btn = document.getElementById('wishlistBtnBig');
+        btn.innerHTML = data.wishlisted ? '❤️ Wishlisted' : '🤍 Wishlist';
+        btn.style.borderColor = data.wishlisted ? 'var(--error)' : '';
+        btn.style.color = data.wishlisted ? 'var(--error)' : '';
+        showToast(data.message, 'success');
+      }
+    }
+
+    function renderReviews(reviews, productId) {
+      document.getElementById('reviewsSection').style.display = 'block';
+      if (isLoggedIn()) document.getElementById('writeReview').style.display = 'block';
+
+      const container = document.getElementById('reviewsList');
+      if (!reviews?.length) {
+        container.innerHTML = '<div style="text-align:center;padding:32px;color:var(--text-secondary)">No reviews yet. Be the first to review!</div>';
+        return;
+      }
+      container.innerHTML = reviews.map(r => `
+        <div class="review-card">
+          <div class="review-header">
+            <div class="review-avatar">${r.user_name?.charAt(0) || 'U'}</div>
+            <div class="review-meta">
+              <strong>${r.user_name || 'Customer'}</strong>
+              <span>${renderStars(r.rating, 14)} ${formatDate(r.created_at)}</span>
+            </div>
+          </div>
+          ${r.title ? `<div class="review-title">${r.title}</div>` : ''}
+          <div class="review-text">${r.comment || ''}</div>
+        </div>
+      `).join('');
+    }
+
+    function setRating(val) {
+      selectedRating = val;
+      document.querySelectorAll('#starPicker .star').forEach((s, i) => {
+        s.textContent = i < val ? '★' : '☆';
+        s.style.color = i < val ? '#d97706' : '#6b7280';
+      });
+    }
+
+    async function submitReview() {
+      if (!selectedRating) return showToast('Please select a rating', 'error');
+      const title = document.getElementById('reviewTitle').value;
+      const comment = document.getElementById('reviewComment').value;
+      const { ok, data } = await api.post(`/products/${currentProduct.id}/reviews`, { rating: selectedRating, title, comment });
+      if (ok && data.success) {
+        showToast('Review submitted! Thank you.', 'success');
+        document.getElementById('writeReview').style.display = 'none';
+        setTimeout(() => loadProduct(currentProduct.slug), 1000);
+      } else showToast(data.message || 'Failed to submit', 'error');
+    }
+
+    function renderRelated(related) {
+      if (!related?.length) return;
+      document.getElementById('relatedSection').style.display = 'block';
+      document.getElementById('relatedGrid').innerHTML = related.map(p => buildProductCard(p)).join('');
+    }
+  </script>
+</body>
+</html>

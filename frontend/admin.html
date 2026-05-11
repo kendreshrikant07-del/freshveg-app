@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Dashboard - FreshVeg</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    body { background: #0f1923; color: #e2e8f0; }
+    .admin-layout { display: grid; grid-template-columns: 240px 1fr; min-height: 100vh; }
+    .admin-sidebar { background: #162030; padding: 24px 0; border-right: 1px solid rgba(255,255,255,.05); position: sticky; top: 0; height: 100vh; overflow-y: auto; }
+    .admin-logo { padding: 0 24px 24px; border-bottom: 1px solid rgba(255,255,255,.08); margin-bottom: 16px; }
+    .admin-logo h2 { font-size: 18px; font-weight: 800; color: var(--primary-light); }
+    .admin-logo p { font-size: 12px; color: rgba(255,255,255,.4); margin-top: 2px; }
+    .admin-nav-item { display: flex; align-items: center; gap: 12px; padding: 12px 24px; font-size: 14px; color: rgba(255,255,255,.7); cursor: pointer; transition: var(--transition); border-left: 3px solid transparent; }
+    .admin-nav-item:hover { background: rgba(255,255,255,.05); color: white; }
+    .admin-nav-item.active { background: rgba(45,138,78,.15); color: var(--primary-light); border-left-color: var(--primary-light); }
+    .admin-nav-icon { font-size: 18px; width: 24px; text-align: center; }
+    .admin-main { padding: 24px; overflow-y: auto; }
+    .admin-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; }
+    .admin-header h1 { font-size: 24px; font-weight: 800; }
+    .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 24px; }
+    .stat-card { background: #162030; border-radius: var(--radius-lg); padding: 20px; border: 1px solid rgba(255,255,255,.05); }
+    .stat-card-title { font-size: 12px; color: rgba(255,255,255,.5); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px; }
+    .stat-card-value { font-size: 28px; font-weight: 900; color: white; }
+    .stat-card-icon { font-size: 32px; float: right; }
+    .stat-card-sub { font-size: 12px; color: rgba(255,255,255,.4); margin-top: 6px; }
+    .admin-panel { background: #162030; border-radius: var(--radius-xl); padding: 24px; border: 1px solid rgba(255,255,255,.05); }
+    .admin-panel-title { font-size: 16px; font-weight: 700; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center; }
+    .admin-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    .admin-table th { padding: 12px 14px; text-align: left; color: rgba(255,255,255,.5); font-weight: 600; border-bottom: 1px solid rgba(255,255,255,.08); font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; }
+    .admin-table td { padding: 12px 14px; border-bottom: 1px solid rgba(255,255,255,.04); vertical-align: middle; }
+    .admin-table tr:hover td { background: rgba(255,255,255,.02); }
+    .admin-table tr:last-child td { border: none; }
+    .status-select { background: transparent; border: 1px solid rgba(255,255,255,.2); color: white; padding: 4px 8px; border-radius: var(--radius-sm); font-size: 12px; cursor: pointer; outline: none; }
+    .status-select option { background: #162030; color: white; }
+    .admin-sections { display: none; }
+    .admin-sections.active { display: block; }
+    .badge { padding: 3px 10px; border-radius: var(--radius-full); font-size: 11px; font-weight: 600; }
+    .badge-admin { background: rgba(168,85,247,.2); color: #c084fc; }
+    .badge-customer { background: rgba(59,130,246,.2); color: #93c5fd; }
+    .revenue-big { font-size: 36px; font-weight: 900; background: linear-gradient(135deg, var(--primary-light), var(--accent)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+    @media (max-width: 900px) { .admin-layout { grid-template-columns: 1fr; } .admin-sidebar { height: auto; position: static; } .stats-grid { grid-template-columns: repeat(2, 1fr); } }
+    /* Order Detail Modal */
+    .od-modal-overlay { position:fixed;inset:0;background:rgba(0,0,0,.7);backdrop-filter:blur(4px);z-index:9999;display:flex;align-items:center;justify-content:center;padding:20px; }
+    .od-modal { background:#162030;border-radius:16px;border:1px solid rgba(255,255,255,.1);width:100%;max-width:600px;max-height:90vh;overflow-y:auto;box-shadow:0 24px 80px rgba(0,0,0,.6); }
+    .od-modal-header { padding:20px 24px 16px;border-bottom:1px solid rgba(255,255,255,.08);display:flex;justify-content:space-between;align-items:center; }
+    .od-modal-header h3 { font-size:18px;font-weight:800;color:white; }
+    .od-close-btn { background:none;border:none;color:rgba(255,255,255,.5);font-size:22px;cursor:pointer;padding:4px 8px;border-radius:8px;transition:.2s; }
+    .od-close-btn:hover { background:rgba(255,255,255,.1);color:white; }
+    .od-section { padding:16px 24px;border-bottom:1px solid rgba(255,255,255,.06); }
+    .od-section:last-child { border-bottom:none; }
+    .od-section-title { font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--primary-light);margin-bottom:12px; }
+    .od-row { display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px;font-size:13px; }
+    .od-label { color:rgba(255,255,255,.45);min-width:120px; }
+    .od-val { color:rgba(255,255,255,.9);text-align:right;font-weight:500; }
+    .od-item-row { display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid rgba(255,255,255,.04);font-size:13px; }
+    .od-item-row:last-child { border-bottom:none; }
+    .od-total-row { display:flex;justify-content:space-between;padding:10px 0 0;font-size:15px;font-weight:800;color:var(--primary-light);margin-top:6px; }
+  </style>
+</head>
+<body>
+  <div class="admin-layout">
+    <!-- Sidebar -->
+    <div class="admin-sidebar">
+      <div class="admin-logo">
+        <h2>🥦 FreshVeg</h2>
+        <p>Admin Dashboard</p>
+      </div>
+      <nav>
+        <div class="admin-nav-item active" onclick="showSection('dashboard', this)"><span class="admin-nav-icon">📊</span> Dashboard</div>
+        <div class="admin-nav-item" onclick="showSection('orders', this)"><span class="admin-nav-icon">📦</span> Orders</div>
+        <div class="admin-nav-item" onclick="showSection('products', this)"><span class="admin-nav-icon">🥦</span> Products</div>
+        <div class="admin-nav-item" onclick="showSection('users', this)"><span class="admin-nav-icon">👥</span> Users</div>
+        <div class="admin-nav-item" onclick="window.location.href='index.html'"><span class="admin-nav-icon">🌐</span> View Store</div>
+        <div class="admin-nav-item" onclick="logout()" style="margin-top:16px;color:#ef4444"><span class="admin-nav-icon">🚪</span> Logout</div>
+      </nav>
+    </div>
+
+    <!-- Main Content -->
+    <div class="admin-main">
+      <!-- Dashboard -->
+      <div id="sec-dashboard" class="admin-sections active">
+        <div class="admin-header">
+          <h1>📊 Dashboard</h1>
+          <div style="font-size:13px;color:rgba(255,255,255,.5)" id="adminUserInfo"></div>
+        </div>
+        <div class="stats-grid" id="statsGrid">
+          <div class="stat-card"><div class="stat-card-title">Total Revenue</div><div class="stat-card-value revenue-big" id="statRevenue">₹0</div></div>
+          <div class="stat-card"><div class="stat-card-title">Total Orders</div><div class="stat-card-value" id="statOrders">0</div><div class="stat-card-sub" id="statPending">0 pending</div></div>
+          <div class="stat-card"><div class="stat-card-title">Total Customers</div><div class="stat-card-value" id="statUsers">0</div></div>
+          <div class="stat-card"><div class="stat-card-title">Active Products</div><div class="stat-card-value" id="statProducts">0</div></div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+          <div class="admin-panel">
+            <div class="admin-panel-title">🕐 Recent Orders</div>
+            <div id="recentOrdersTable"></div>
+          </div>
+          <div class="admin-panel">
+            <div class="admin-panel-title">🏆 Top Products</div>
+            <div id="topProductsTable"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Orders -->
+      <div id="sec-orders" class="admin-sections">
+        <div class="admin-header">
+          <h1>📦 Orders Management</h1>
+          <select class="status-select" id="orderStatusFilter" onchange="loadAdminOrders()" style="width:auto">
+            <option value="">All Status</option>
+            <option value="pending">Pending</option>
+            <option value="confirmed">Confirmed</option>
+            <option value="processing">Processing</option>
+            <option value="packed">Packed</option>
+            <option value="out_for_delivery">Out for Delivery</option>
+            <option value="delivered">Delivered</option>
+            <option value="cancelled">Cancelled</option>
+          </select>
+        </div>
+        <div class="admin-panel">
+          <table class="admin-table">
+            <thead><tr><th>Order #</th><th>Customer</th><th>Amount</th><th>Payment</th><th>Date</th><th>Status</th><th>Update</th><th>Details</th></tr></thead>
+            <tbody id="ordersTableBody"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Products -->
+      <div id="sec-products" class="admin-sections">
+        <div class="admin-header">
+          <h1>🥦 Products Management</h1>
+          <button class="btn btn-primary btn-sm" onclick="showAddProductForm()">+ Add Product</button>
+        </div>
+        <div class="admin-panel" id="addProductPanel" style="display:none;margin-bottom:16px">
+          <div class="admin-panel-title">Add New Product</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px">
+            <div class="form-group"><label class="form-label" style="color:rgba(255,255,255,.6)">Product Name</label><input type="text" class="form-input" id="newProdName" placeholder="e.g. Fresh Carrot" style="background:#0f1923;color:white;border-color:rgba(255,255,255,.1)"></div>
+            <div class="form-group"><label class="form-label" style="color:rgba(255,255,255,.6)">Category</label><select class="form-select" id="newProdCat" style="background:#0f1923;color:white;border-color:rgba(255,255,255,.1)"><option value="">Select Category</option></select></div>
+            <div class="form-group"><label class="form-label" style="color:rgba(255,255,255,.6)">Unit</label><input type="text" class="form-input" id="newProdUnit" placeholder="kg / bunch / piece" style="background:#0f1923;color:white;border-color:rgba(255,255,255,.1)"></div>
+            <div class="form-group"><label class="form-label" style="color:rgba(255,255,255,.6)">Price (₹)</label><input type="number" class="form-input" id="newProdPrice" placeholder="0.00" style="background:#0f1923;color:white;border-color:rgba(255,255,255,.1)"></div>
+            <div class="form-group"><label class="form-label" style="color:rgba(255,255,255,.6)">MRP (₹)</label><input type="number" class="form-input" id="newProdMrp" placeholder="0.00" style="background:#0f1923;color:white;border-color:rgba(255,255,255,.1)"></div>
+            <div class="form-group"><label class="form-label" style="color:rgba(255,255,255,.6)">Stock</label><input type="number" class="form-input" id="newProdStock" placeholder="100" style="background:#0f1923;color:white;border-color:rgba(255,255,255,.1)"></div>
+          </div>
+          <div class="form-group"><label class="form-label" style="color:rgba(255,255,255,.6)">Description</label><textarea class="form-textarea" id="newProdDesc" rows="2" placeholder="Product description" style="background:#0f1923;color:white;border-color:rgba(255,255,255,.1)"></textarea></div>
+          <div style="display:flex;gap:8px">
+            <label style="display:flex;align-items:center;gap:6px;font-size:13px;cursor:pointer"><input type="checkbox" id="newProdOrganic" style="accent-color:var(--primary)"> Organic</label>
+            <label style="display:flex;align-items:center;gap:6px;font-size:13px;cursor:pointer"><input type="checkbox" id="newProdFeatured" style="accent-color:var(--primary)"> Featured</label>
+          </div>
+          <div style="display:flex;gap:8px;margin-top:16px">
+            <button class="btn btn-primary" onclick="saveNewProduct()">Save Product</button>
+            <button class="btn btn-outline" onclick="document.getElementById('addProductPanel').style.display='none'" style="color:white;border-color:rgba(255,255,255,.2)">Cancel</button>
+          </div>
+        </div>
+        <div class="admin-panel">
+          <table class="admin-table">
+            <thead><tr><th>Product</th><th>Category</th><th>Price</th><th>Stock</th><th>Rating</th><th>Sold</th><th>Status</th><th>Actions</th></tr></thead>
+            <tbody id="productsTableBody"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Users -->
+      <div id="sec-users" class="admin-sections">
+        <div class="admin-header"><h1>👥 Users Management</h1></div>
+        <div class="admin-panel">
+          <table class="admin-table">
+            <thead><tr><th>Name</th><th>Email</th><th>Phone</th><th>Role</th><th>Joined</th></tr></thead>
+            <tbody id="usersTableBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast-container" id="toastContainer"></div>
+
+  <!-- Order Detail Modal -->
+  <div class="od-modal-overlay" id="orderDetailOverlay" style="display:none" onclick="if(event.target===this)closeOrderDetail()">
+    <div class="od-modal" id="orderDetailModal">
+      <div class="od-modal-header">
+        <h3 id="odTitle">Order Details</h3>
+        <button class="od-close-btn" onclick="closeOrderDetail()">✕</button>
+      </div>
+      <div id="odContent"></div>
+    </div>
+  </div>
+
+  <script src="js/api.js"></script>
+  <script src="js/auth.js"></script>
+  <script>
+    let categories = [];
+
+    document.addEventListener('DOMContentLoaded', async () => {
+      const user = getUser();
+      if (!user || user.role !== 'admin') {
+        showToast('Admin access required', 'error');
+        setTimeout(() => window.location.href = 'auth.html', 1000);
+        return;
+      }
+      document.getElementById('adminUserInfo').textContent = `Logged in as ${user.name}`;
+      await loadDashboard();
+      await loadCategories();
+    });
+
+    function showSection(id, navEl) {
+      document.querySelectorAll('.admin-sections').forEach(s => s.classList.remove('active'));
+      document.querySelectorAll('.admin-nav-item').forEach(n => n.classList.remove('active'));
+      document.getElementById(`sec-${id}`).classList.add('active');
+      if (navEl) navEl.classList.add('active');
+      if (id === 'orders') loadAdminOrders();
+      if (id === 'products') loadAdminProducts();
+      if (id === 'users') loadAdminUsers();
+    }
+
+    async function loadDashboard() {
+      const { ok, data } = await api.get('/admin/dashboard');
+      if (!ok) { showToast('Failed to load dashboard', 'error'); return; }
+      const s = data.stats;
+      document.getElementById('statRevenue').textContent = formatCurrency(s.total_revenue);
+      document.getElementById('statOrders').textContent = s.total_orders;
+      document.getElementById('statPending').textContent = `${s.pending_orders} pending`;
+      document.getElementById('statUsers').textContent = s.total_users;
+      document.getElementById('statProducts').textContent = s.total_products;
+
+      document.getElementById('recentOrdersTable').innerHTML = `
+        <table class="admin-table">
+          <thead><tr><th>Order #</th><th>Customer</th><th>Amount</th><th>Status</th></tr></thead>
+          <tbody>${data.recent_orders.map(o => `
+            <tr><td>${o.order_number}</td><td>${o.customer_name || 'N/A'}</td><td>${formatCurrency(o.total_amount)}</td><td>${getStatusBadge(o.status)}</td></tr>
+          `).join('')}</tbody>
+        </table>
+      `;
+      document.getElementById('topProductsTable').innerHTML = `
+        <table class="admin-table">
+          <thead><tr><th>Product</th><th>Sold</th><th>Price</th><th>Rating</th></tr></thead>
+          <tbody>${data.top_products.map(p => `
+            <tr><td>${getVeggieEmoji(p.name)} ${p.name}</td><td>${p.sold_count}</td><td>${formatCurrency(p.price)}</td><td>⭐ ${p.rating}</td></tr>
+          `).join('')}</tbody>
+        </table>
+      `;
+    }
+
+    async function loadCategories() {
+      const { ok, data } = await api.get('/products/categories');
+      if (ok) {
+        categories = data.categories;
+        const sel = document.getElementById('newProdCat');
+        if (sel) sel.innerHTML = '<option value="">Select Category</option>' + categories.map(c => `<option value="${c.id}">${c.icon} ${c.name}</option>`).join('');
+      }
+    }
+
+    async function loadAdminOrders() {
+      const status = document.getElementById('orderStatusFilter')?.value || '';
+      const { ok, data } = await api.get(`/admin/orders?limit=50${status ? '&status=' + status : ''}`);
+      if (!ok) return;
+      // Store orders for modal access
+      window._adminOrders = data.orders;
+      document.getElementById('ordersTableBody').innerHTML = data.orders.map((o, idx) => `
+        <tr>
+          <td style="font-weight:600">#${o.order_number}</td>
+          <td>${o.customer_name || 'N/A'}<br><small style="color:rgba(255,255,255,.4)">${o.customer_email}</small></td>
+          <td style="color:var(--primary-light);font-weight:700">${formatCurrency(o.total_amount)}</td>
+          <td><span style="text-transform:capitalize;font-size:12px">${o.payment_method}</span></td>
+          <td style="font-size:12px">${formatDate(o.created_at)}</td>
+          <td>${getStatusBadge(o.status)}</td>
+          <td>
+            <select class="status-select" onchange="updateOrderStatus('${o.id}', this.value)">
+              ${['pending','confirmed','processing','packed','out_for_delivery','delivered','cancelled'].map(s => `<option value="${s}" ${s === o.status ? 'selected' : ''}>${s.replace(/_/g,' ')}</option>`).join('')}
+            </select>
+          </td>
+          <td>
+            <button onclick="viewOrder(${idx})" style="background:rgba(45,138,78,.2);border:1px solid rgba(45,138,78,.4);color:#4ade80;padding:5px 10px;border-radius:8px;cursor:pointer;font-size:12px;font-weight:600;transition:.2s" onmouseover="this.style.background='rgba(45,138,78,.35)'" onmouseout="this.style.background='rgba(45,138,78,.2)'">👁 View</button>
+          </td>
+        </tr>
+      `).join('');
+    }
+
+    async function updateOrderStatus(orderId, status) {
+      const { ok, data } = await api.put(`/admin/orders/${orderId}/status`, { status });
+      if (ok && data.success) showToast('Order status updated', 'success');
+      else showToast(data.message || 'Update failed', 'error');
+    }
+
+    function viewOrder(idx) {
+      const o = window._adminOrders[idx];
+      if (!o) return;
+      const a = o.address || {};
+      const addrLines = [a.address_line1, a.address_line2, a.landmark].filter(Boolean).join(', ');
+      const cityLine = [a.city, a.state, a.pincode].filter(Boolean).join(', ');
+      const items = o.items || [];
+      document.getElementById('odTitle').textContent = `Order #${o.order_number}`;
+      document.getElementById('odContent').innerHTML = `
+        <div class="od-section">
+          <div class="od-section-title">📍 Delivery Address</div>
+          <div class="od-row"><span class="od-label">Name</span><span class="od-val">${a.name || o.customer_name || 'N/A'}</span></div>
+          <div class="od-row"><span class="od-label">Phone</span><span class="od-val">${a.phone || o.customer_phone || 'N/A'}</span></div>
+          <div class="od-row"><span class="od-label">Address</span><span class="od-val" style="max-width:280px;text-align:right">${addrLines || 'N/A'}</span></div>
+          ${a.landmark ? `<div class="od-row"><span class="od-label">Landmark</span><span class="od-val">${a.landmark}</span></div>` : ''}
+          <div class="od-row"><span class="od-label">City / State</span><span class="od-val">${cityLine || 'N/A'}</span></div>
+          <div class="od-row"><span class="od-label">Pincode</span><span class="od-val">${a.pincode || 'N/A'}</span></div>
+          <div class="od-row"><span class="od-label">Address Type</span><span class="od-val" style="text-transform:capitalize">${a.address_type || 'N/A'}</span></div>
+        </div>
+        <div class="od-section">
+          <div class="od-section-title">💳 Payment Info</div>
+          <div class="od-row"><span class="od-label">Method</span><span class="od-val" style="text-transform:capitalize">${o.payment_method || 'N/A'}</span></div>
+          <div class="od-row"><span class="od-label">Payment Status</span><span class="od-val" style="text-transform:capitalize">${o.payment_status || 'N/A'}</span></div>
+          ${o.notes ? `<div class="od-row"><span class="od-label">Transaction / Notes</span><span class="od-val" style="max-width:280px;text-align:right">${o.notes}</span></div>` : ''}
+        </div>
+        <div class="od-section">
+          <div class="od-section-title">🛒 Items Ordered</div>
+          ${items.length ? items.map(i => `
+            <div class="od-item-row">
+              <span>${i.product_name} <span style="color:rgba(255,255,255,.4);font-size:12px">× ${i.quantity} ${i.unit}</span></span>
+              <span style="font-weight:700;color:var(--primary-light)">₹${i.subtotal?.toFixed(2)}</span>
+            </div>
+          `).join('') : '<div style="color:rgba(255,255,255,.4);font-size:13px">No item details available</div>'}
+          <div style="border-top:1px solid rgba(255,255,255,.1);margin-top:8px">
+            ${o.delivery_fee > 0 ? `<div class="od-item-row"><span style="color:rgba(255,255,255,.5)">Delivery Fee</span><span>₹${o.delivery_fee?.toFixed(2)}</span></div>` : '<div class="od-item-row"><span style="color:rgba(255,255,255,.5)">Delivery</span><span style="color:#4ade80">FREE</span></div>'}
+            ${o.discount_amount > 0 ? `<div class="od-item-row"><span style="color:rgba(255,255,255,.5)">Discount</span><span style="color:#fbbf24">-₹${o.discount_amount?.toFixed(2)}</span></div>` : ''}
+          </div>
+          <div class="od-total-row"><span>Total Paid</span><span>₹${o.total_amount?.toFixed(2)}</span></div>
+        </div>
+        <div class="od-section">
+          <div class="od-section-title">ℹ️ Order Info</div>
+          <div class="od-row"><span class="od-label">Order Date</span><span class="od-val">${new Date(o.created_at).toLocaleString('en-IN')}</span></div>
+          <div class="od-row"><span class="od-label">Est. Delivery</span><span class="od-val">${o.estimated_delivery ? new Date(o.estimated_delivery).toLocaleString('en-IN') : 'N/A'}</span></div>
+          <div class="od-row"><span class="od-label">Status</span><span class="od-val">${o.status?.replace(/_/g,' ')?.toUpperCase()}</span></div>
+          <div class="od-row"><span class="od-label">Customer</span><span class="od-val">${o.customer_name} · ${o.customer_email}</span></div>
+        </div>
+      `;
+      document.getElementById('orderDetailOverlay').style.display = 'flex';
+    }
+
+    function closeOrderDetail() {
+      document.getElementById('orderDetailOverlay').style.display = 'none';
+    }
+
+    async function loadAdminProducts() {
+      const { ok, data } = await api.get('/admin/products');
+      if (!ok) return;
+      document.getElementById('productsTableBody').innerHTML = data.products.map(p => `
+        <tr>
+          <td><div style="display:flex;align-items:center;gap:8px"><span style="font-size:24px">${getVeggieEmoji(p.name)}</span><div><div style="font-weight:600">${p.name}</div><div style="font-size:11px;color:rgba(255,255,255,.4)">${p.is_organic ? '🌱 Organic' : ''} ${p.is_featured ? '⭐ Featured' : ''}</div></div></div></td>
+          <td style="font-size:13px;color:rgba(255,255,255,.6)">${p.category_name}</td>
+          <td><strong style="color:var(--primary-light)">${formatCurrency(p.price)}</strong><br><small style="text-decoration:line-through;color:rgba(255,255,255,.3)">${formatCurrency(p.mrp)}</small></td>
+          <td><span style="color:${p.stock_quantity < 10 ? '#ef4444' : 'rgba(255,255,255,.8)'}">${p.stock_quantity}</span></td>
+          <td>⭐ ${p.rating} (${p.review_count})</td>
+          <td>${p.sold_count}</td>
+          <td><span style="color:${p.is_active ? '#4ade80' : '#6b7280'}">${p.is_active ? '✅ Active' : '❌ Inactive'}</span></td>
+          <td><button class="btn btn-danger btn-sm" onclick="deactivateProduct('${p.id}')">Deactivate</button></td>
+        </tr>
+      `).join('');
+    }
+
+    async function deactivateProduct(id) {
+      if (!confirm('Deactivate this product?')) return;
+      const { ok } = await api.delete(`/admin/products/${id}`);
+      if (ok) { showToast('Product deactivated', 'info'); loadAdminProducts(); }
+    }
+
+    function showAddProductForm() {
+      const panel = document.getElementById('addProductPanel');
+      panel.style.display = panel.style.display === 'none' ? 'block' : 'none';
+    }
+
+    async function saveNewProduct() {
+      const data = {
+        name: document.getElementById('newProdName').value,
+        category_id: document.getElementById('newProdCat').value,
+        unit: document.getElementById('newProdUnit').value,
+        price: parseFloat(document.getElementById('newProdPrice').value),
+        mrp: parseFloat(document.getElementById('newProdMrp').value),
+        stock_quantity: parseFloat(document.getElementById('newProdStock').value),
+        description: document.getElementById('newProdDesc').value,
+        is_organic: document.getElementById('newProdOrganic').checked,
+        is_featured: document.getElementById('newProdFeatured').checked,
+      };
+      if (!data.name || !data.category_id || !data.price || !data.mrp) return showToast('Fill all required fields', 'error');
+      const { ok, r } = await api.post('/admin/products', data);
+      if (ok) { showToast('Product added!', 'success'); document.getElementById('addProductPanel').style.display = 'none'; loadAdminProducts(); }
+    }
+
+    async function loadAdminUsers() {
+      const { ok, data } = await api.get('/admin/users');
+      if (!ok) return;
+      document.getElementById('usersTableBody').innerHTML = data.users.map(u => `
+        <tr>
+          <td style="font-weight:600">${u.name}</td>
+          <td style="color:rgba(255,255,255,.7)">${u.email}</td>
+          <td style="color:rgba(255,255,255,.6)">${u.phone || 'N/A'}</td>
+          <td><span class="badge badge-${u.role}">${u.role}</span></td>
+          <td style="font-size:12px;color:rgba(255,255,255,.4)">${formatDate(u.created_at)}</td>
+        </tr>
+      `).join('');
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FreshVeg - Farm Fresh Vegetables Delivered</title>
+  <meta name="description" content="Order fresh organic vegetables online. Farm to table delivery in 2 hours. Best quality guaranteed.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/home.css">
+</head>
+<body>
+  <!-- Navbar -->
+  <nav class="navbar" id="navbar">
+    <div class="nav-container">
+      <a href="index.html" class="nav-brand">
+        <span class="brand-icon">🥦</span>
+        <span class="brand-name">FreshVeg</span>
+      </a>
+
+      <div class="nav-search">
+        <div class="search-box">
+          <span class="search-icon">🔍</span>
+          <input type="text" id="globalSearch" placeholder="Search for vegetables, herbs..." autocomplete="off">
+          <div class="search-dropdown" id="searchDropdown"></div>
+        </div>
+      </div>
+
+      <div class="nav-actions">
+        <a href="products.html" class="nav-link" title="Products">🛍️ Shop</a>
+        <a href="wishlist.html" class="nav-link" title="Wishlist" id="navWishlist">❤️ Wishlist</a>
+        <a href="cart.html" class="nav-link cart-link" id="navCart">
+          🛒 Cart
+          <span class="cart-badge" id="cartBadge" style="display:none">0</span>
+        </a>
+        <div class="nav-user" id="navUser">
+          <a href="auth.html" class="btn btn-primary btn-sm" id="loginBtn">Login</a>
+          <div class="user-dropdown" id="userDropdown" style="display:none">
+            <button class="user-avatar" id="userAvatarBtn">
+              <span id="userInitial">U</span>
+            </button>
+            <div class="dropdown-menu" id="dropdownMenu">
+              <div class="dropdown-header">
+                <strong id="dropdownName">User</strong>
+                <small id="dropdownEmail">user@email.com</small>
+              </div>
+              <a href="orders.html" class="dropdown-item">📦 My Orders</a>
+              <a href="wishlist.html" class="dropdown-item">❤️ Wishlist</a>
+              <a href="profile.html" class="dropdown-item">👤 Profile</a>
+              <a href="admin.html" class="dropdown-item admin-link" id="adminLink" style="display:none">🛠️ Admin Panel</a>
+              <hr>
+              <button class="dropdown-item logout-btn" id="logoutBtn">🚪 Logout</button>
+            </div>
+          </div>
+        </div>
+        <button class="mobile-menu-btn" id="mobileMenuBtn">☰</button>
+      </div>
+    </div>
+
+    <!-- Delivery Location Bar -->
+    <div class="delivery-bar">
+      <div class="delivery-container">
+        <span class="delivery-info">📍 Delivering to: <strong>Mumbai - 400001</strong></span>
+        <div class="delivery-tags">
+          <span class="tag">🚀 Express Delivery</span>
+          <span class="tag">🌱 100% Fresh</span>
+          <span class="tag">🚚 Free above ₹500</span>
+          <span class="tag">✅ Quality Guaranteed</span>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Hero Section -->
+  <section class="hero" id="home">
+    <div class="hero-bg"></div>
+    <div class="hero-particles" id="particles"></div>
+    <div class="hero-container">
+      <div class="hero-content">
+        <div class="hero-badge">🌱 100% Organic & Fresh</div>
+        <h1 class="hero-title">
+          Farm Fresh Vegetables
+          <span class="hero-gradient">Delivered to Your Door</span>
+        </h1>
+        <p class="hero-subtitle">Experience the taste of freshness. We source directly from local farmers and deliver within 2 hours. Quality guaranteed or money back.</p>
+        <div class="hero-actions">
+          <a href="products.html" class="btn btn-hero-primary">
+            <span>Shop Now</span>
+            <span class="btn-icon">→</span>
+          </a>
+          <a href="#categories" class="btn btn-hero-secondary">Browse Categories</a>
+        </div>
+        <div class="hero-stats">
+          <div class="stat">
+            <strong>10K+</strong>
+            <span>Happy Customers</span>
+          </div>
+          <div class="stat-divider"></div>
+          <div class="stat">
+            <strong>500+</strong>
+            <span>Products</span>
+          </div>
+          <div class="stat-divider"></div>
+          <div class="stat">
+            <strong>2hr</strong>
+            <span>Delivery</span>
+          </div>
+          <div class="stat-divider"></div>
+          <div class="stat">
+            <strong>50+</strong>
+            <span>Farmers</span>
+          </div>
+        </div>
+      </div>
+      <div class="hero-visual">
+        <div class="hero-card floating">
+          <div class="hero-emoji">🥗</div>
+          <div class="hero-card-info">
+            <span>Daily Fresh Salad Box</span>
+            <strong>Just ₹199</strong>
+          </div>
+        </div>
+        <div class="hero-veggie-grid">
+          <span class="veg-icon" style="--delay:0s">🥦</span>
+          <span class="veg-icon" style="--delay:.2s">🍅</span>
+          <span class="veg-icon" style="--delay:.4s">🥕</span>
+          <span class="veg-icon" style="--delay:.6s">🧅</span>
+          <span class="veg-icon" style="--delay:.8s">🥬</span>
+          <span class="veg-icon" style="--delay:1s">🌽</span>
+          <span class="veg-icon" style="--delay:1.2s">🫑</span>
+          <span class="veg-icon" style="--delay:1.4s">🥑</span>
+          <span class="veg-icon" style="--delay:1.6s">🧄</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Features Bar -->
+  <section class="features-bar">
+    <div class="container">
+      <div class="features-grid">
+        <div class="feature-item">
+          <span class="feature-icon">🚀</span>
+          <div>
+            <strong>Express Delivery</strong>
+            <p>In 2 hours</p>
+          </div>
+        </div>
+        <div class="feature-item">
+          <span class="feature-icon">🌱</span>
+          <div>
+            <strong>100% Organic</strong>
+            <p>Farm sourced</p>
+          </div>
+        </div>
+        <div class="feature-item">
+          <span class="feature-icon">💰</span>
+          <div>
+            <strong>Best Prices</strong>
+            <p>Guaranteed</p>
+          </div>
+        </div>
+        <div class="feature-item">
+          <span class="feature-icon">🔄</span>
+          <div>
+            <strong>Easy Returns</strong>
+            <p>No questions asked</p>
+          </div>
+        </div>
+        <div class="feature-item">
+          <span class="feature-icon">🛡️</span>
+          <div>
+            <strong>Safe Payments</strong>
+            <p>100% secure</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Categories Section -->
+  <section class="section categories-section" id="categories">
+    <div class="container">
+      <div class="section-header">
+        <h2 class="section-title">Shop by Category</h2>
+        <p class="section-subtitle">Explore our wide range of fresh vegetables</p>
+      </div>
+      <div class="categories-grid" id="categoriesGrid">
+        <div class="skeleton-grid">
+          <div class="skeleton-card"></div>
+          <div class="skeleton-card"></div>
+          <div class="skeleton-card"></div>
+          <div class="skeleton-card"></div>
+          <div class="skeleton-card"></div>
+          <div class="skeleton-card"></div>
+          <div class="skeleton-card"></div>
+          <div class="skeleton-card"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Offer Banner -->
+  <section class="offer-banner">
+    <div class="container">
+      <div class="banner-grid">
+        <div class="banner-card banner-primary" onclick="applyOffer('FRESH10')">
+          <div class="banner-content">
+            <span class="banner-badge">Limited Offer</span>
+            <h3>Get 10% OFF</h3>
+            <p>On your first order above ₹100</p>
+            <code class="coupon-code">FRESH10</code>
+          </div>
+          <div class="banner-visual">🛒</div>
+        </div>
+        <div class="banner-card banner-secondary" onclick="applyOffer('NEWUSER')">
+          <div class="banner-content">
+            <span class="banner-badge">New User</span>
+            <h3>20% OFF</h3>
+            <p>Welcome offer for new users</p>
+            <code class="coupon-code">NEWUSER</code>
+          </div>
+          <div class="banner-visual">🎁</div>
+        </div>
+        <div class="banner-card banner-tertiary">
+          <div class="banner-content">
+            <span class="banner-badge">Always</span>
+            <h3>Free Delivery</h3>
+            <p>On orders above ₹500</p>
+            <span class="coupon-code">No code needed</span>
+          </div>
+          <div class="banner-visual">🚚</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Featured Products -->
+  <section class="section" id="featured">
+    <div class="container">
+      <div class="section-header">
+        <h2 class="section-title">⭐ Featured Products</h2>
+        <a href="products.html" class="see-all-link">See All →</a>
+      </div>
+      <div class="products-grid" id="featuredGrid">
+        <div class="skeleton-grid">
+          <div class="skeleton-product"></div>
+          <div class="skeleton-product"></div>
+          <div class="skeleton-product"></div>
+          <div class="skeleton-product"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Why Choose Us -->
+  <section class="section why-section">
+    <div class="container">
+      <div class="section-header">
+        <h2 class="section-title">Why Choose FreshVeg?</h2>
+      </div>
+      <div class="why-grid">
+        <div class="why-card">
+          <div class="why-icon">🌾</div>
+          <h3>Direct from Farmers</h3>
+          <p>We partner with 50+ local farmers to bring you the freshest produce, cutting out middlemen for better prices.</p>
+        </div>
+        <div class="why-card">
+          <div class="why-icon">❄️</div>
+          <h3>Cold Chain Delivery</h3>
+          <p>Our temperature-controlled delivery ensures vegetables remain fresh from the farm all the way to your kitchen.</p>
+        </div>
+        <div class="why-card">
+          <div class="why-icon">🔬</div>
+          <h3>Quality Tested</h3>
+          <p>Every batch is tested for pesticides and chemicals. We guarantee 100% safe and healthy produce.</p>
+        </div>
+        <div class="why-card">
+          <div class="why-icon">♻️</div>
+          <h3>Eco Packaging</h3>
+          <p>All our packaging is biodegradable. We're committed to a sustainable future for our planet.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Testimonials -->
+  <section class="section testimonials-section">
+    <div class="container">
+      <div class="section-header">
+        <h2 class="section-title">What Our Customers Say</h2>
+      </div>
+      <div class="testimonials-grid">
+        <div class="testimonial-card">
+          <div class="stars">⭐⭐⭐⭐⭐</div>
+          <p>"The vegetables are incredibly fresh! I can taste the difference compared to supermarket produce. Delivery is always on time."</p>
+          <div class="reviewer">
+            <div class="reviewer-avatar">P</div>
+            <div>
+              <strong>Priya Sharma</strong>
+              <span>Mumbai</span>
+            </div>
+          </div>
+        </div>
+        <div class="testimonial-card featured-testimonial">
+          <div class="stars">⭐⭐⭐⭐⭐</div>
+          <p>"Best vegetable delivery app! The spinach and coriander are always so fresh and green. My family loves it. Highly recommended!"</p>
+          <div class="reviewer">
+            <div class="reviewer-avatar">R</div>
+            <div>
+              <strong>Rahul Verma</strong>
+              <span>Delhi</span>
+            </div>
+          </div>
+        </div>
+        <div class="testimonial-card">
+          <div class="stars">⭐⭐⭐⭐⭐</div>
+          <p>"Amazing quality and great prices. The organic broccoli and exotic vegetables section is excellent. I order every week!"</p>
+          <div class="reviewer">
+            <div class="reviewer-avatar">A</div>
+            <div>
+              <strong>Anita Patel</strong>
+              <span>Ahmedabad</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Newsletter -->
+  <section class="newsletter-section">
+    <div class="container">
+      <div class="newsletter-content">
+        <div>
+          <h2>🌿 Stay Updated!</h2>
+          <p>Subscribe for seasonal offers, recipes, and health tips</p>
+        </div>
+        <div class="newsletter-form">
+          <input type="email" id="newsletterEmail" placeholder="Enter your email address">
+          <button class="btn btn-primary" onclick="subscribeNewsletter()">Subscribe</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-grid">
+        <div class="footer-brand">
+          <div class="brand-logo">🥦 FreshVeg</div>
+          <p>Bringing farm-fresh vegetables to your doorstep. Quality, freshness, and convenience — all in one place.</p>
+          <div class="social-links">
+            <a href="#" class="social-link">📘</a>
+            <a href="#" class="social-link">📸</a>
+            <a href="#" class="social-link">🐦</a>
+            <a href="#" class="social-link">▶️</a>
+          </div>
+        </div>
+        <div class="footer-links">
+          <h4>Quick Links</h4>
+          <ul>
+            <li><a href="index.html">Home</a></li>
+            <li><a href="products.html">All Products</a></li>
+            <li><a href="orders.html">Track Order</a></li>
+            <li><a href="cart.html">Cart</a></li>
+          </ul>
+        </div>
+        <div class="footer-links">
+          <h4>Categories</h4>
+          <ul>
+            <li><a href="products.html?category=leafy-greens">Leafy Greens</a></li>
+            <li><a href="products.html?category=root-vegetables">Root Vegetables</a></li>
+            <li><a href="products.html?category=exotic-vegetables">Exotic Veggies</a></li>
+            <li><a href="products.html?category=mushrooms">Mushrooms</a></li>
+          </ul>
+        </div>
+        <div class="footer-links">
+          <h4>Support</h4>
+          <ul>
+            <li><a href="#">Help Center</a></li>
+            <li><a href="#">Return Policy</a></li>
+            <li><a href="#">Privacy Policy</a></li>
+            <li><a href="#">Terms of Service</a></li>
+          </ul>
+        </div>
+        <div class="footer-contact">
+          <h4>Contact Us</h4>
+          <p>📞 1800-FRESHVEG (Toll Free)</p>
+          <p>📧 support@freshveg.com</p>
+          <p>🕒 8 AM - 10 PM Daily</p>
+          <div class="payment-icons">
+            <span class="payment-icon">💳 UPI</span>
+            <span class="payment-icon">🏦 Net Banking</span>
+            <span class="payment-icon">💵 COD</span>
+          </div>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <p>© 2024 FreshVeg. All rights reserved. Made with 💚 for fresh living</p>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Toast Notification -->
+  <div class="toast-container" id="toastContainer"></div>
+
+  <!-- Add to Cart Quick Modal -->
+  <div class="modal-overlay" id="quickAddModal" style="display:none">
+    <div class="quick-add-modal">
+      <button class="modal-close" onclick="closeQuickAdd()">✕</button>
+      <div id="quickAddContent"></div>
+    </div>
+  </div>
+
+  <script src="js/api.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/cart.js"></script>
+  <script src="js/home.js"></script>
+</body>
+</html>

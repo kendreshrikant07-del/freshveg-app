@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Shop Vegetables - FreshVeg</title>
+  <meta name="description" content="Browse fresh organic vegetables. Filter by category, price, and more.">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    .shop-layout { display: grid; grid-template-columns: 260px 1fr; gap: 24px; padding: 32px 0; }
+    .sidebar { position: sticky; top: 140px; height: fit-content; }
+    .filter-card { background: white; border-radius: var(--radius-lg); padding: 20px; margin-bottom: 16px; box-shadow: var(--shadow-sm); }
+    .filter-title { font-size: 15px; font-weight: 700; margin-bottom: 16px; display: flex; justify-content: space-between; align-items: center; cursor: pointer; }
+    .filter-title span { font-size: 12px; color: var(--primary); }
+    .filter-option { display: flex; align-items: center; gap: 10px; padding: 6px 0; cursor: pointer; font-size: 14px; }
+    .filter-option input { accent-color: var(--primary); width: 16px; height: 16px; cursor: pointer; }
+    .filter-option label { cursor: pointer; flex: 1; }
+    .filter-option .count { color: var(--text-muted); font-size: 12px; }
+    .price-range { display: flex; gap: 8px; align-items: center; }
+    .price-input { flex: 1; padding: 6px 10px; border: 2px solid var(--border); border-radius: var(--radius-sm); font-size: 13px; outline: none; }
+    .price-input:focus { border-color: var(--primary); }
+    .shop-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; flex-wrap: wrap; gap: 12px; }
+    .results-info { font-size: 14px; color: var(--text-secondary); }
+    .results-info strong { color: var(--text-primary); }
+    .sort-select { padding: 8px 14px; border: 2px solid var(--border); border-radius: var(--radius); font-size: 14px; outline: none; cursor: pointer; }
+    .sort-select:focus { border-color: var(--primary); }
+    .active-filters { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px; }
+    .filter-chip { display: inline-flex; align-items: center; gap: 6px; background: var(--primary-pale); color: var(--primary); padding: 4px 12px; border-radius: var(--radius-full); font-size: 12px; font-weight: 600; cursor: pointer; }
+    .filter-chip:hover { background: var(--primary); color: white; }
+    .pagination { display: flex; gap: 8px; justify-content: center; margin-top: 32px; flex-wrap: wrap; }
+    .page-btn { width: 38px; height: 38px; border-radius: var(--radius); border: 2px solid var(--border); background: white; font-size: 14px; font-weight: 600; cursor: pointer; transition: var(--transition); display: flex; align-items: center; justify-content: center; }
+    .page-btn:hover, .page-btn.active { background: var(--primary); color: white; border-color: var(--primary); }
+    .search-bar-mobile { padding: 16px 0 0; display: none; }
+    @media (max-width: 900px) {
+      .shop-layout { grid-template-columns: 1fr; }
+      .sidebar { position: static; display: none; }
+      .sidebar.open { display: block; }
+      .search-bar-mobile { display: block; }
+    }
+  </style>
+</head>
+<body>
+  <nav class="navbar" id="navbar">
+    <div class="nav-container">
+      <a href="index.html" class="nav-brand"><span class="brand-icon">🥦</span><span class="brand-name">FreshVeg</span></a>
+      <div class="nav-search"><div class="search-box"><span class="search-icon">🔍</span><input type="text" id="globalSearch" placeholder="Search vegetables..." autocomplete="off"><div class="search-dropdown" id="searchDropdown"></div></div></div>
+      <div class="nav-actions">
+        <a href="products.html" class="nav-link">🛍️ Shop</a>
+        <a href="wishlist.html" class="nav-link">❤️ Wishlist</a>
+        <a href="cart.html" class="nav-link cart-link" id="navCart">🛒 Cart<span class="cart-badge" id="cartBadge" style="display:none">0</span></a>
+        <div class="nav-user" id="navUser">
+          <a href="auth.html" class="btn btn-primary btn-sm" id="loginBtn">Login</a>
+          <div class="user-dropdown" id="userDropdown" style="display:none">
+            <button class="user-avatar" id="userAvatarBtn"><span id="userInitial">U</span></button>
+            <div class="dropdown-menu" id="dropdownMenu">
+              <div class="dropdown-header"><strong id="dropdownName">User</strong><small id="dropdownEmail"></small></div>
+              <a href="orders.html" class="dropdown-item">📦 My Orders</a>
+              <a href="wishlist.html" class="dropdown-item">❤️ Wishlist</a>
+              <a href="profile.html" class="dropdown-item">👤 Profile</a>
+              <a href="admin.html" class="dropdown-item admin-link" id="adminLink" style="display:none">🛠️ Admin</a>
+              <hr><button class="dropdown-item logout-btn" id="logoutBtn">🚪 Logout</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="delivery-bar"><div class="delivery-container"><span class="delivery-info">📍 Mumbai - 400001</span><div class="delivery-tags"><span class="tag">🚀 Express Delivery</span><span class="tag">🚚 Free above ₹500</span></div></div></div>
+  </nav>
+
+  <div class="page-header">
+    <div class="container">
+      <div class="breadcrumb">
+        <a href="index.html">Home</a><span class="breadcrumb-sep">›</span><span>Shop</span>
+      </div>
+      <h1>🛍️ Fresh Vegetables</h1>
+      <p>Farm fresh, delivered to your door</p>
+    </div>
+  </div>
+
+  <div class="container">
+    <div class="shop-layout">
+      <!-- Sidebar Filters -->
+      <aside class="sidebar" id="sidebar">
+        <div class="filter-card">
+          <div class="filter-title">📂 Categories</div>
+          <div id="categoryFilters">
+            <div class="skeleton-card" style="height:200px"></div>
+          </div>
+        </div>
+        <div class="filter-card">
+          <div class="filter-title">💰 Price Range</div>
+          <div class="price-range">
+            <input type="number" class="price-input" id="minPrice" placeholder="Min ₹">
+            <span>–</span>
+            <input type="number" class="price-input" id="maxPrice" placeholder="Max ₹">
+          </div>
+          <button class="btn btn-primary btn-sm btn-block" style="margin-top:12px" onclick="applyPriceFilter()">Apply</button>
+        </div>
+        <div class="filter-card">
+          <div class="filter-title">🌱 Type</div>
+          <div class="filter-option">
+            <input type="checkbox" id="organicFilter" onchange="applyFilters()">
+            <label for="organicFilter">Organic Only</label>
+          </div>
+          <div class="filter-option">
+            <input type="checkbox" id="featuredFilter" onchange="applyFilters()">
+            <label for="featuredFilter">Featured</label>
+          </div>
+        </div>
+        <button class="btn btn-outline btn-block" onclick="clearAllFilters()">Clear All Filters</button>
+      </aside>
+
+      <!-- Products Area -->
+      <main>
+        <div class="shop-header">
+          <div class="results-info">Showing <strong id="resultCount">...</strong> products</div>
+          <select class="sort-select" id="sortSelect" onchange="applyFilters()">
+            <option value="">Sort: Featured</option>
+            <option value="rating">⭐ Top Rated</option>
+            <option value="price_asc">💰 Price: Low to High</option>
+            <option value="price_desc">💸 Price: High to Low</option>
+            <option value="discount">🏷️ Best Discount</option>
+            <option value="popular">🔥 Most Popular</option>
+            <option value="newest">🆕 Newest First</option>
+          </select>
+        </div>
+        <div class="active-filters" id="activeFilters"></div>
+        <div class="products-grid" id="productsGrid">
+          <div class="skeleton-grid">
+            <div class="skeleton-product"></div><div class="skeleton-product"></div>
+            <div class="skeleton-product"></div><div class="skeleton-product"></div>
+            <div class="skeleton-product"></div><div class="skeleton-product"></div>
+          </div>
+        </div>
+        <div class="pagination" id="pagination"></div>
+      </main>
+    </div>
+  </div>
+
+  <div class="toast-container" id="toastContainer"></div>
+
+  <script src="js/api.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/cart.js"></script>
+  <script>
+    let currentPage = 1;
+    let currentFilters = {};
+    const urlParams = new URLSearchParams(window.location.search);
+
+    document.addEventListener('DOMContentLoaded', async () => {
+      // Read URL params
+      if (urlParams.get('category')) currentFilters.category = urlParams.get('category');
+      if (urlParams.get('search')) {
+        currentFilters.search = urlParams.get('search');
+        document.getElementById('globalSearch').value = urlParams.get('search');
+      }
+      await Promise.all([loadCategories(), loadProducts()]);
+    });
+
+    async function loadCategories() {
+      const { ok, data } = await api.get('/products/categories');
+      if (!ok) return;
+      const container = document.getElementById('categoryFilters');
+      container.innerHTML = `
+        <div class="filter-option">
+          <input type="radio" name="catFilter" id="cat-all" value="" onchange="selectCategory('')" ${!currentFilters.category ? 'checked' : ''}>
+          <label for="cat-all">All Categories</label>
+        </div>
+        ${data.categories.map(c => `
+          <div class="filter-option">
+            <input type="radio" name="catFilter" id="cat-${c.slug}" value="${c.slug}" onchange="selectCategory('${c.slug}')" ${currentFilters.category === c.slug ? 'checked' : ''}>
+            <label for="cat-${c.slug}">${c.icon} ${c.name}</label>
+            <span class="count">${c.product_count}</span>
+          </div>
+        `).join('')}
+      `;
+    }
+
+    function selectCategory(slug) {
+      if (slug) currentFilters.category = slug;
+      else delete currentFilters.category;
+      currentPage = 1;
+      loadProducts();
+    }
+
+    function applyPriceFilter() {
+      const min = document.getElementById('minPrice').value;
+      const max = document.getElementById('maxPrice').value;
+      if (min) currentFilters.min_price = min; else delete currentFilters.min_price;
+      if (max) currentFilters.max_price = max; else delete currentFilters.max_price;
+      currentPage = 1;
+      loadProducts();
+    }
+
+    function applyFilters() {
+      const organic = document.getElementById('organicFilter')?.checked;
+      const featured = document.getElementById('featuredFilter')?.checked;
+      const sort = document.getElementById('sortSelect')?.value;
+      if (organic) currentFilters.organic = 'true'; else delete currentFilters.organic;
+      if (featured) currentFilters.featured = 'true'; else delete currentFilters.featured;
+      if (sort) currentFilters.sort = sort; else delete currentFilters.sort;
+      currentPage = 1;
+      loadProducts();
+    }
+
+    function clearAllFilters() {
+      currentFilters = {};
+      currentPage = 1;
+      document.querySelectorAll('input[name="catFilter"]')[0]?.click();
+      document.getElementById('minPrice').value = '';
+      document.getElementById('maxPrice').value = '';
+      document.getElementById('organicFilter').checked = false;
+      document.getElementById('featuredFilter').checked = false;
+      document.getElementById('sortSelect').value = '';
+      loadProducts();
+    }
+
+    async function loadProducts() {
+      const grid = document.getElementById('productsGrid');
+      grid.innerHTML = '<div class="skeleton-grid"><div class="skeleton-product"></div><div class="skeleton-product"></div><div class="skeleton-product"></div><div class="skeleton-product"></div><div class="skeleton-product"></div><div class="skeleton-product"></div></div>';
+
+      const params = new URLSearchParams({ ...currentFilters, page: currentPage, limit: 12 });
+      const { ok, data } = await api.get(`/products?${params}`);
+
+      if (!ok || !data.products) {
+        grid.innerHTML = '<div class="empty-state"><div class="empty-icon">🥦</div><h3 class="empty-title">No products found</h3><p class="empty-desc">Try adjusting your filters</p></div>';
+        return;
+      }
+
+      document.getElementById('resultCount').textContent = data.pagination.total;
+
+      if (!data.products.length) {
+        grid.innerHTML = '<div class="empty-state" style="grid-column:1/-1"><div class="empty-icon">🔍</div><h3 class="empty-title">No products found</h3><p class="empty-desc">Try different search terms or filters</p><button class="btn btn-primary" onclick="clearAllFilters()">Clear Filters</button></div>';
+        return;
+      }
+
+      grid.innerHTML = data.products.map(p => buildProductCard(p)).join('');
+      renderPagination(data.pagination);
+      renderActiveFilters();
+    }
+
+    function renderPagination(pagination) {
+      const container = document.getElementById('pagination');
+      if (pagination.pages <= 1) { container.innerHTML = ''; return; }
+      let html = '';
+      if (currentPage > 1) html += `<button class="page-btn" onclick="goToPage(${currentPage - 1})">‹</button>`;
+      for (let i = 1; i <= pagination.pages; i++) {
+        if (i === 1 || i === pagination.pages || Math.abs(i - currentPage) <= 2) {
+          html += `<button class="page-btn ${i === currentPage ? 'active' : ''}" onclick="goToPage(${i})">${i}</button>`;
+        } else if (Math.abs(i - currentPage) === 3) {
+          html += `<span style="padding:0 8px;color:#6b7280">...</span>`;
+        }
+      }
+      if (currentPage < pagination.pages) html += `<button class="page-btn" onclick="goToPage(${currentPage + 1})">›</button>`;
+      container.innerHTML = html;
+    }
+
+    function goToPage(page) {
+      currentPage = page;
+      loadProducts();
+      window.scrollTo({ top: 300, behavior: 'smooth' });
+    }
+
+    function renderActiveFilters() {
+      const container = document.getElementById('activeFilters');
+      const chips = [];
+      if (currentFilters.category) chips.push(`<span class="filter-chip" onclick="selectCategory('')">📂 ${currentFilters.category} ✕</span>`);
+      if (currentFilters.search) chips.push(`<span class="filter-chip" onclick="clearSearch()">🔍 "${currentFilters.search}" ✕</span>`);
+      if (currentFilters.organic) chips.push(`<span class="filter-chip" onclick="clearOrganic()">🌱 Organic ✕</span>`);
+      if (currentFilters.min_price || currentFilters.max_price) chips.push(`<span class="filter-chip" onclick="clearPrice()">💰 Price Filter ✕</span>`);
+      container.innerHTML = chips.join('');
+    }
+    function clearSearch() { delete currentFilters.search; document.getElementById('globalSearch').value = ''; loadProducts(); }
+    function clearOrganic() { delete currentFilters.organic; document.getElementById('organicFilter').checked = false; loadProducts(); }
+    function clearPrice() { delete currentFilters.min_price; delete currentFilters.max_price; document.getElementById('minPrice').value=''; document.getElementById('maxPrice').value=''; loadProducts(); }
+  </script>
+</body>
+</html>

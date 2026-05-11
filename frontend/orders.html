@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>My Orders - FreshVeg</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    .orders-tabs { display: flex; gap: 8px; margin-bottom: 24px; flex-wrap: wrap; }
+    .tab-btn { padding: 8px 16px; border-radius: var(--radius-full); border: 2px solid var(--border); background: white; font-size: 13px; font-weight: 600; cursor: pointer; transition: var(--transition); }
+    .tab-btn.active { background: var(--primary); color: white; border-color: var(--primary); }
+    .order-card { background: white; border-radius: var(--radius-xl); padding: 24px; margin-bottom: 16px; box-shadow: var(--shadow-sm); transition: var(--transition); border: 2px solid transparent; }
+    .order-card:hover { border-color: var(--primary-pale); box-shadow: var(--shadow-md); }
+    .order-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 16px; flex-wrap: wrap; gap: 12px; }
+    .order-number { font-size: 16px; font-weight: 700; }
+    .order-date { font-size: 13px; color: var(--text-secondary); }
+    .order-items-preview { display: flex; gap: 12px; margin-bottom: 16px; flex-wrap: wrap; }
+    .order-item-chip { background: var(--bg); padding: 8px 12px; border-radius: var(--radius); font-size: 13px; display: flex; align-items: center; gap: 6px; }
+    .order-footer { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; }
+    .order-total { font-size: 18px; font-weight: 800; color: var(--primary-dark); }
+    .order-actions { display: flex; gap: 8px; }
+    .tracking-steps { display: flex; gap: 0; margin: 20px 0; }
+    .track-step { flex: 1; text-align: center; position: relative; }
+    .track-step::after { content: ''; position: absolute; top: 15px; left: 50%; right: -50%; height: 2px; background: var(--border); z-index: 0; }
+    .track-step:last-child::after { display: none; }
+    .track-dot { width: 30px; height: 30px; border-radius: 50%; background: var(--border); margin: 0 auto 8px; display: flex; align-items: center; justify-content: center; font-size: 12px; position: relative; z-index: 1; }
+    .track-step.done .track-dot { background: var(--success); color: white; }
+    .track-step.done::after { background: var(--success); }
+    .track-step.current .track-dot { background: var(--primary); color: white; animation: pulse 1.5s infinite; }
+    .track-label { font-size: 10px; color: var(--text-secondary); font-weight: 600; }
+    @keyframes pulse { 0%,100%{box-shadow:0 0 0 0 rgba(45,138,78,.4)} 50%{box-shadow:0 0 0 6px rgba(45,138,78,0)} }
+    .success-banner { background: linear-gradient(135deg, #dcfce7, #bbf7d0); border: 2px solid var(--success); border-radius: var(--radius-xl); padding: 32px; text-align: center; margin-bottom: 24px; }
+  </style>
+</head>
+<body>
+  <nav class="navbar">
+    <div class="nav-container">
+      <a href="index.html" class="nav-brand"><span class="brand-icon">🥦</span><span class="brand-name">FreshVeg</span></a>
+      <div class="nav-actions">
+        <a href="products.html" class="nav-link">🛍️ Shop</a>
+        <a href="cart.html" class="nav-link cart-link">🛒 Cart<span class="cart-badge" id="cartBadge" style="display:none">0</span></a>
+        <div class="nav-user" id="navUser">
+          <a href="auth.html" class="btn btn-primary btn-sm" id="loginBtn">Login</a>
+          <div class="user-dropdown" id="userDropdown" style="display:none">
+            <button class="user-avatar" id="userAvatarBtn"><span id="userInitial">U</span></button>
+            <div class="dropdown-menu" id="dropdownMenu">
+              <div class="dropdown-header"><strong id="dropdownName">User</strong><small id="dropdownEmail"></small></div>
+              <a href="orders.html" class="dropdown-item">📦 My Orders</a>
+              <a href="profile.html" class="dropdown-item">👤 Profile</a>
+              <hr><button class="dropdown-item logout-btn" id="logoutBtn">🚪 Logout</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <div class="page-header">
+    <div class="container">
+      <h1>📦 My Orders</h1>
+      <p>Track and manage your orders</p>
+    </div>
+  </div>
+
+  <div class="container" style="padding-top:32px;padding-bottom:60px">
+    <div id="successBanner" style="display:none"></div>
+    <div class="orders-tabs">
+      <button class="tab-btn active" onclick="filterOrders('all', this)">All Orders</button>
+      <button class="tab-btn" onclick="filterOrders('pending', this)">⏳ Pending</button>
+      <button class="tab-btn" onclick="filterOrders('out_for_delivery', this)">🚴 Out for Delivery</button>
+      <button class="tab-btn" onclick="filterOrders('delivered', this)">✅ Delivered</button>
+      <button class="tab-btn" onclick="filterOrders('cancelled', this)">❌ Cancelled</button>
+    </div>
+    <div id="ordersList">
+      <div class="skeleton-card" style="height:150px;margin-bottom:16px"></div>
+      <div class="skeleton-card" style="height:150px;margin-bottom:16px"></div>
+    </div>
+  </div>
+
+  <!-- Order Detail Modal -->
+  <div class="modal-overlay" id="orderModal" style="display:none">
+    <div class="modal" style="max-width:600px;max-height:90vh;overflow-y:auto">
+      <button class="modal-close" onclick="closeOrderModal()">✕</button>
+      <div id="orderModalContent"></div>
+    </div>
+  </div>
+
+  <div class="toast-container" id="toastContainer"></div>
+
+  <script src="js/api.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/cart.js"></script>
+  <script>
+    let allOrders = [];
+    let currentFilter = 'all';
+
+    document.addEventListener('DOMContentLoaded', async () => {
+      if (!requireAuth()) return;
+
+      // Show success banner
+      const params = new URLSearchParams(window.location.search);
+      const successOrderNo = params.get('success');
+      if (successOrderNo) {
+        document.getElementById('successBanner').style.display = 'block';
+        document.getElementById('successBanner').innerHTML = `
+          <div class="success-banner">
+            <div style="font-size:56px;margin-bottom:12px">🎉</div>
+            <h2 style="color:var(--success);margin-bottom:8px">Order Placed Successfully!</h2>
+            <p style="color:#16a34a;font-size:16px;font-weight:600">Order #${successOrderNo}</p>
+            <p style="color:var(--text-secondary);margin-top:8px">Your fresh vegetables will be delivered within 2 hours. Thank you for ordering!</p>
+          </div>
+        `;
+      }
+      await loadOrders();
+    });
+
+    async function loadOrders() {
+      const { ok, data } = await api.get('/orders/my-orders?limit=50');
+      if (!ok) { showToast('Failed to load orders', 'error'); return; }
+      allOrders = data.orders || [];
+      renderOrders();
+    }
+
+    function filterOrders(status, btn) {
+      currentFilter = status;
+      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+      if (btn) btn.classList.add('active');
+      renderOrders();
+    }
+
+    function renderOrders() {
+      const filtered = currentFilter === 'all' ? allOrders : allOrders.filter(o => o.status === currentFilter);
+      const container = document.getElementById('ordersList');
+
+      if (!filtered.length) {
+        container.innerHTML = `<div class="empty-state"><div class="empty-icon">📭</div><h3 class="empty-title">No Orders Found</h3><p class="empty-desc">You haven't placed any orders yet</p><a href="products.html" class="btn btn-primary">Start Shopping</a></div>`;
+        return;
+      }
+
+      const steps = ['pending', 'confirmed', 'processing', 'packed', 'out_for_delivery', 'delivered'];
+
+      container.innerHTML = filtered.map(order => `
+        <div class="order-card">
+          <div class="order-header">
+            <div>
+              <div class="order-number">Order #${order.order_number}</div>
+              <div class="order-date">Placed on ${formatDateTime(order.created_at)}</div>
+            </div>
+            ${getStatusBadge(order.status)}
+          </div>
+          ${order.status !== 'cancelled' ? `
+          <div class="tracking-steps">
+            ${steps.map((s, i) => {
+              const stepIdx = steps.indexOf(order.status);
+              const cls = i < stepIdx ? 'done' : i === stepIdx ? 'current' : '';
+              const icons = ['⏳','✅','⚙️','📦','🚴','🎉'];
+              return `<div class="track-step ${cls}"><div class="track-dot">${icons[i]}</div><div class="track-label">${s.replace(/_/g,' ')}</div></div>`;
+            }).join('')}
+          </div>` : ''}
+          <div class="order-items-preview">
+            ${(order.items_summary || '').split(', ').slice(0,3).map(item => `<span class="order-item-chip">${getVeggieEmoji(item)} ${item}</span>`).join('')}
+          </div>
+          <div class="order-footer">
+            <div class="order-total">${formatCurrency(order.total_amount)}</div>
+            <div class="order-actions">
+              <button class="btn btn-outline btn-sm" onclick="viewOrderDetail('${order.id}')">View Details</button>
+              ${['pending', 'confirmed'].includes(order.status) ? `<button class="btn btn-danger btn-sm" onclick="cancelOrder('${order.id}')">Cancel</button>` : ''}
+            </div>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    async function viewOrderDetail(orderId) {
+      const { ok, data } = await api.get(`/orders/${orderId}`);
+      if (!ok) { showToast('Failed to load order details', 'error'); return; }
+      const o = data.order;
+      document.getElementById('orderModalContent').innerHTML = `
+        <h2 style="margin-bottom:4px">Order #${o.order_number}</h2>
+        <p style="color:var(--text-secondary);font-size:13px;margin-bottom:20px">${formatDateTime(o.created_at)}</p>
+        ${getStatusBadge(o.status)}
+        <div style="margin:20px 0;background:var(--bg);padding:16px;border-radius:var(--radius-lg)">
+          <strong>📍 Delivery Address</strong>
+          <p style="font-size:14px;margin-top:8px;color:var(--text-secondary)">
+            ${o.address.full_name} | ${o.address.phone}<br>
+            ${o.address.address_line1}${o.address.address_line2 ? ', ' + o.address.address_line2 : ''}<br>
+            ${o.address.city}, ${o.address.state} - ${o.address.pincode}
+          </p>
+        </div>
+        <strong>🛒 Order Items</strong>
+        ${o.items.map(item => `
+          <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--border-light)">
+            <div style="display:flex;align-items:center;gap:10px">
+              <span style="font-size:24px">${getVeggieEmoji(item.product_name)}</span>
+              <div>
+                <div style="font-size:14px;font-weight:600">${item.product_name}</div>
+                <div style="font-size:12px;color:var(--text-secondary)">${item.quantity} ${item.unit} × ${formatCurrency(item.price)}</div>
+              </div>
+            </div>
+            <span style="font-weight:700">${formatCurrency(item.subtotal)}</span>
+          </div>
+        `).join('')}
+        <div style="margin-top:16px;border-top:2px solid var(--border);padding-top:16px">
+          <div style="display:flex;justify-content:space-between;font-size:14px;margin-bottom:6px"><span>Subtotal</span><span>${formatCurrency(o.subtotal)}</span></div>
+          <div style="display:flex;justify-content:space-between;font-size:14px;margin-bottom:6px"><span>Delivery</span><span>${o.delivery_fee === 0 ? 'FREE' : formatCurrency(o.delivery_fee)}</span></div>
+          ${o.discount_amount > 0 ? `<div style="display:flex;justify-content:space-between;font-size:14px;margin-bottom:6px"><span>Discount</span><span style="color:var(--success)">-${formatCurrency(o.discount_amount)}</span></div>` : ''}
+          <div style="display:flex;justify-content:space-between;font-size:18px;font-weight:800;margin-top:8px"><span>Total</span><span style="color:var(--primary-dark)">${formatCurrency(o.total_amount)}</span></div>
+        </div>
+        <div style="margin-top:16px;display:flex;gap:8px">
+          <a href="products.html" class="btn btn-primary">🛍️ Shop Again</a>
+        </div>
+      `;
+      document.getElementById('orderModal').style.display = 'flex';
+    }
+
+    function closeOrderModal() { document.getElementById('orderModal').style.display = 'none'; }
+
+    async function cancelOrder(orderId) {
+      if (!confirm('Are you sure you want to cancel this order?')) return;
+      const { ok, data } = await api.put(`/orders/${orderId}/cancel`);
+      if (ok && data.success) { showToast('Order cancelled', 'info'); await loadOrders(); }
+      else showToast(data.message || 'Cannot cancel this order', 'error');
+    }
+  </script>
+</body>
+</html>

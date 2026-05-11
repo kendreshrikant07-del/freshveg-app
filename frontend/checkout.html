@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Checkout - FreshVeg</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    .checkout-layout { display: grid; grid-template-columns: 1fr 380px; gap: 24px; padding: 32px 0; }
+    .checkout-step { background: white; border-radius: var(--radius-xl); padding: 28px; margin-bottom: 20px; box-shadow: var(--shadow-sm); }
+    .step-header { display: flex; align-items: center; gap: 12px; margin-bottom: 24px; }
+    .step-number { width: 32px; height: 32px; border-radius: 50%; background: var(--primary); color: white; font-weight: 700; font-size: 15px; display: flex; align-items: center; justify-content: center; }
+    .step-title { font-size: 18px; font-weight: 700; }
+    .address-card { border: 2px solid var(--border); border-radius: var(--radius-lg); padding: 16px; cursor: pointer; transition: var(--transition); margin-bottom: 12px; position: relative; }
+    .address-card.selected { border-color: var(--primary); background: var(--primary-pale); }
+    .address-card-label { font-size: 12px; font-weight: 700; text-transform: uppercase; color: var(--primary); margin-bottom: 6px; }
+    .address-card-name { font-weight: 600; margin-bottom: 4px; }
+    .address-card-text { font-size: 14px; color: var(--text-secondary); }
+    .payment-option { border: 2px solid var(--border); border-radius: var(--radius-lg); padding: 16px; cursor: pointer; margin-bottom: 10px; display: flex; align-items: center; gap: 12px; transition: var(--transition); }
+    .payment-option.selected { border-color: var(--primary); background: var(--primary-pale); }
+    .payment-option input { accent-color: var(--primary); }
+    .payment-icon { font-size: 28px; }
+    .payment-info strong { display: block; font-size: 14px; font-weight: 700; }
+    .payment-info span { font-size: 12px; color: var(--text-secondary); }
+    .order-items-list { max-height: 300px; overflow-y: auto; }
+    .order-item { display: flex; gap: 12px; padding: 12px 0; border-bottom: 1px solid var(--border-light); align-items: center; }
+    .order-item:last-child { border: none; }
+    .order-item-emoji { font-size: 32px; width: 44px; height: 44px; background: var(--primary-pale); border-radius: var(--radius-sm); display: flex; align-items: center; justify-content: center; }
+    .order-item-name { flex: 1; font-size: 14px; font-weight: 600; }
+    .order-item-qty { font-size: 12px; color: var(--text-secondary); }
+    .order-item-price { font-size: 14px; font-weight: 700; color: var(--primary-dark); }
+    @media (max-width: 900px) { .checkout-layout { grid-template-columns: 1fr; } }
+    .upi-details-box { display:none; background: linear-gradient(135deg, #f0fdf4, #dcfce7); border: 2px solid var(--primary); border-radius: var(--radius-lg); padding: 20px; margin-top: 12px; animation: fadeIn .3s ease; }
+    .upi-details-box.visible { display: block; }
+    @keyframes fadeIn { from{opacity:0;transform:translateY(-8px)} to{opacity:1;transform:translateY(0)} }
+    .upi-id-row { display: flex; align-items: center; gap: 10px; background: white; border: 1.5px dashed var(--primary); border-radius: var(--radius); padding: 12px 16px; margin: 12px 0; }
+    .upi-id-text { flex:1; font-size: 16px; font-weight: 700; color: var(--primary-dark); letter-spacing: 0.5px; font-family: monospace; }
+    .upi-copy-btn { background: var(--primary); color: white; border: none; padding: 6px 14px; border-radius: var(--radius-sm); font-size: 12px; font-weight: 700; cursor: pointer; transition: var(--transition); }
+    .upi-copy-btn:hover { background: var(--primary-dark); }
+    .upi-apps { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 10px; }
+    .upi-app-chip { background: white; border: 1.5px solid var(--border); border-radius: var(--radius-full); padding: 4px 12px; font-size: 12px; font-weight: 600; color: var(--text-secondary); }
+  </style>
+</head>
+<body>
+  <nav class="navbar">
+    <div class="nav-container">
+      <a href="index.html" class="nav-brand"><span class="brand-icon">🥦</span><span class="brand-name">FreshVeg</span></a>
+      <div class="nav-actions">
+        <a href="cart.html" class="nav-link">← Back to Cart</a>
+        <div class="nav-user" id="navUser">
+          <a href="auth.html" class="btn btn-primary btn-sm" id="loginBtn">Login</a>
+          <div class="user-dropdown" id="userDropdown" style="display:none">
+            <button class="user-avatar" id="userAvatarBtn"><span id="userInitial">U</span></button>
+            <div class="dropdown-menu" id="dropdownMenu">
+              <div class="dropdown-header"><strong id="dropdownName">User</strong><small id="dropdownEmail"></small></div>
+              <hr><button class="dropdown-item logout-btn" id="logoutBtn">🚪 Logout</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <div class="page-header">
+    <div class="container">
+      <h1>💳 Checkout</h1>
+      <p>Complete your order</p>
+    </div>
+  </div>
+
+  <div class="container">
+    <div class="checkout-layout">
+      <div>
+        <!-- Delivery Address -->
+        <div class="checkout-step">
+          <div class="step-header">
+            <div class="step-number">1</div>
+            <div class="step-title">Delivery Address</div>
+          </div>
+          <div id="addressList">
+            <div class="skeleton-card" style="height:80px"></div>
+          </div>
+          <button class="btn btn-outline btn-sm" style="margin-top:12px" onclick="showAddAddressForm()">+ Add New Address</button>
+          <div id="addAddressForm" style="display:none;margin-top:16px">
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+              <div class="form-group"><label class="form-label">Full Name</label><input type="text" class="form-input" id="addrName" placeholder="Full Name"></div>
+              <div class="form-group"><label class="form-label">Phone</label><input type="tel" class="form-input" id="addrPhone" placeholder="Phone Number"></div>
+            </div>
+            <div class="form-group"><label class="form-label">Address Line 1</label><input type="text" class="form-input" id="addrLine1" placeholder="House/Flat No, Street"></div>
+            <div class="form-group"><label class="form-label">Address Line 2 (Optional)</label><input type="text" class="form-input" id="addrLine2" placeholder="Landmark, Area"></div>
+            <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px">
+              <div class="form-group"><label class="form-label">City</label><input type="text" class="form-input" id="addrCity" placeholder="City"></div>
+              <div class="form-group"><label class="form-label">State</label><input type="text" class="form-input" id="addrState" placeholder="State"></div>
+              <div class="form-group"><label class="form-label">Pincode</label><input type="text" class="form-input" id="addrPincode" placeholder="Pincode"></div>
+            </div>
+            <div style="display:flex;gap:12px">
+              <button class="btn btn-primary" onclick="saveAddress()">Save Address</button>
+              <button class="btn btn-outline" onclick="hideAddressForm()">Cancel</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Payment Method -->
+        <div class="checkout-step">
+          <div class="step-header">
+            <div class="step-number">2</div>
+            <div class="step-title">Payment Method</div>
+          </div>
+          <div id="paymentOptions">
+            <div class="payment-option selected" onclick="selectPayment('cod', this)">
+              <input type="radio" name="payment" checked> <span class="payment-icon">💵</span>
+              <div class="payment-info"><strong>Cash on Delivery</strong><span>Pay when delivered</span></div>
+            </div>
+            <div class="payment-option" onclick="selectPayment('upi', this)">
+              <input type="radio" name="payment"> <span class="payment-icon">📱</span>
+              <div class="payment-info"><strong>UPI Payment</strong><span>PhonePe, Google Pay, Paytm • 9075798377</span></div>
+            </div>
+
+            <!-- UPI Details Panel -->
+            <div class="upi-details-box" id="upiDetailsBox">
+              <div style="font-size:13px;font-weight:700;color:var(--primary-dark);margin-bottom:4px">📲 Pay via UPI to:</div>
+              <div class="upi-id-row">
+                <span class="upi-id-text" id="upiIdText">9075798377@paytm</span>
+                <button class="upi-copy-btn" onclick="copyUpiId()">📋 Copy</button>
+              </div>
+              <div style="font-size:12px;color:var(--text-secondary);margin-bottom:8px">Or use mobile number: <strong style="color:var(--primary-dark)">9075798377</strong></div>
+              <div style="font-size:12px;font-weight:600;color:var(--text-secondary);margin-bottom:6px">Accepted on:</div>
+              <div class="upi-apps">
+                <span class="upi-app-chip">📱 PhonePe</span>
+                <span class="upi-app-chip">💰 Google Pay</span>
+                <span class="upi-app-chip">🟦 Paytm</span>
+                <span class="upi-app-chip">🏦 BHIM</span>
+                <span class="upi-app-chip">🔵 Amazon Pay</span>
+              </div>
+              <div style="margin-top:14px">
+                <label style="font-size:13px;font-weight:700;color:var(--primary-dark);display:block;margin-bottom:6px">✅ Enter UTR / Transaction ID <span style="color:var(--error)">*</span></label>
+                <input type="text" id="utrInput" class="form-input" placeholder="e.g. 123456789012 (12-digit UTR)" style="font-family:monospace;letter-spacing:1px" oninput="validateUtr()">
+                <div id="utrHelp" style="font-size:11px;color:var(--text-muted);margin-top:4px">Find UTR in your UPI app under payment history after paying to <strong>9075798377</strong></div>
+              </div>
+              <div style="margin-top:12px;padding:10px 14px;background:rgba(245,158,11,.1);border-radius:var(--radius-sm);border-left:3px solid var(--warning);font-size:12px;color:#92400e">
+                ⚠️ Payment goes to UPI: <strong>9075798377@paytm</strong> (Mobile: <strong>9075798377</strong>). Enter UTR above to confirm payment.
+              </div>
+            </div>
+
+            <div class="payment-option" onclick="selectPayment('card', this)">
+              <input type="radio" name="payment"> <span class="payment-icon">💳</span>
+              <div class="payment-info"><strong>Credit/Debit Card</strong><span>Visa, Mastercard, RuPay</span></div>
+            </div>
+            <div class="payment-option" onclick="selectPayment('netbanking', this)">
+              <input type="radio" name="payment"> <span class="payment-icon">🏦</span>
+              <div class="payment-info"><strong>Net Banking</strong><span>All major banks</span></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Order Notes -->
+        <div class="checkout-step">
+          <div class="step-header">
+            <div class="step-number">3</div>
+            <div class="step-title">Order Notes (Optional)</div>
+          </div>
+          <textarea class="form-textarea" id="orderNotes" rows="3" placeholder="Special delivery instructions, preferred time, etc."></textarea>
+        </div>
+      </div>
+
+      <!-- Order Summary -->
+      <div>
+        <div class="checkout-step">
+          <div class="step-title" style="margin-bottom:16px">📦 Order Summary</div>
+          <div class="order-items-list" id="orderItemsList">
+            <div class="skeleton-card" style="height:200px"></div>
+          </div>
+          <hr style="margin:16px 0;border:none;border-top:1px solid var(--border)">
+          <div style="display:flex;justify-content:space-between;font-size:14px;margin-bottom:8px"><span>Subtotal</span><span id="chkSubtotal">₹0</span></div>
+          <div style="display:flex;justify-content:space-between;font-size:14px;margin-bottom:8px"><span>Delivery Fee</span><span id="chkDelivery">₹40</span></div>
+          <div style="display:flex;justify-content:space-between;font-size:14px;margin-bottom:8px" id="chkDiscRow" style="display:none"><span>Coupon Discount</span><span id="chkDiscount" style="color:var(--success)">-₹0</span></div>
+          <hr style="margin:12px 0;border:none;border-top:2px solid var(--border)">
+          <div style="display:flex;justify-content:space-between;font-size:18px;font-weight:800">
+            <span>Total</span><span id="chkTotal" style="color:var(--primary-dark)">₹0</span>
+          </div>
+          <button class="btn btn-primary btn-block btn-lg" style="margin-top:20px" onclick="placeOrder()" id="placeOrderBtn">
+            🎉 Place Order
+          </button>
+          <p style="text-align:center;font-size:12px;color:var(--text-muted);margin-top:12px">🔒 Secure & encrypted checkout</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast-container" id="toastContainer"></div>
+
+  <script src="js/api.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/cart.js"></script>
+  <script>
+    let selectedAddressId = null;
+    let selectedPayment = 'cod';
+    let cartSummary = null;
+    let couponCode = null;
+    let couponDiscount = 0;
+
+    document.addEventListener('DOMContentLoaded', async () => {
+      if (!requireAuth()) return;
+      const params = new URLSearchParams(window.location.search);
+      couponCode = params.get('coupon');
+      await Promise.all([loadAddresses(), loadCart()]);
+    });
+
+    async function loadAddresses() {
+      const { ok, data } = await api.get('/auth/profile');
+      if (!ok) return;
+      const addresses = data.addresses || [];
+      const container = document.getElementById('addressList');
+      if (!addresses.length) {
+        container.innerHTML = '<p style="color:var(--text-secondary);font-size:14px">No saved addresses. Please add one.</p>';
+        showAddAddressForm();
+        return;
+      }
+      container.innerHTML = addresses.map(a => `
+        <div class="address-card ${a.is_default ? 'selected' : ''}" onclick="selectAddress('${a.id}', this)" id="addr-${a.id}">
+          <div class="address-card-label">${a.label} ${a.is_default ? '• Default' : ''}</div>
+          <div class="address-card-name">${a.full_name} | ${a.phone}</div>
+          <div class="address-card-text">${a.address_line1}${a.address_line2 ? ', ' + a.address_line2 : ''}, ${a.city}, ${a.state} - ${a.pincode}</div>
+        </div>
+      `).join('');
+      const defaultAddr = addresses.find(a => a.is_default) || addresses[0];
+      if (defaultAddr) selectAddress(defaultAddr.id);
+    }
+
+    async function loadCart() {
+      const { ok, data } = await api.get('/cart');
+      if (!ok) return;
+      cartSummary = data.summary;
+      const items = data.items || [];
+
+      document.getElementById('orderItemsList').innerHTML = items.map(item => `
+        <div class="order-item">
+          <div class="order-item-emoji">${getVeggieEmoji(item.name)}</div>
+          <div style="flex:1">
+            <div class="order-item-name">${item.name}</div>
+            <div class="order-item-qty">${item.quantity} ${item.unit}</div>
+          </div>
+          <div class="order-item-price">${formatCurrency(item.price * item.quantity)}</div>
+        </div>
+      `).join('');
+
+      // Handle coupon discount
+      if (couponCode) {
+        const { ok: cok, data: cd } = await api.post('/cart/apply-coupon', { code: couponCode, subtotal: data.summary.subtotal });
+        if (cok && cd.success) couponDiscount = cd.discount;
+      }
+      updateCheckoutSummary();
+    }
+
+    function updateCheckoutSummary() {
+      if (!cartSummary) return;
+      document.getElementById('chkSubtotal').textContent = formatCurrency(cartSummary.subtotal);
+      document.getElementById('chkDelivery').textContent = cartSummary.delivery_fee === 0 ? '🎉 FREE' : formatCurrency(cartSummary.delivery_fee);
+      if (couponDiscount > 0) {
+        document.getElementById('chkDiscRow').style.display = 'flex';
+        document.getElementById('chkDiscount').textContent = `-${formatCurrency(couponDiscount)}`;
+      }
+      const total = cartSummary.subtotal + (cartSummary.delivery_fee || 0) - couponDiscount;
+      document.getElementById('chkTotal').textContent = formatCurrency(total);
+    }
+
+    function selectAddress(id, el) {
+      selectedAddressId = id;
+      document.querySelectorAll('.address-card').forEach(c => c.classList.remove('selected'));
+      const target = el || document.getElementById(`addr-${id}`);
+      if (target) target.classList.add('selected');
+    }
+
+    function selectPayment(method, el) {
+      selectedPayment = method;
+      document.querySelectorAll('.payment-option').forEach(o => { o.classList.remove('selected'); o.querySelector('input').checked = false; });
+      if (el) { el.classList.add('selected'); el.querySelector('input').checked = true; }
+      // Show/hide UPI details
+      const upiBox = document.getElementById('upiDetailsBox');
+      if (upiBox) upiBox.classList.toggle('visible', method === 'upi');
+      // Update Place Order button label
+      const btn = document.getElementById('placeOrderBtn');
+      if (method === 'cod') {
+        btn.innerHTML = '🎉 Place Order (Pay on Delivery)';
+      } else if (method === 'upi') {
+        btn.innerHTML = '✅ Confirm & Place Order';
+      } else {
+        btn.innerHTML = '🎉 Place Order';
+      }
+    }
+
+    function validateUtr() {
+      const val = document.getElementById('utrInput')?.value.trim();
+      const help = document.getElementById('utrHelp');
+      if (!help) return;
+      if (val && val.length >= 6) {
+        help.innerHTML = '✅ <span style="color:var(--success);font-weight:600">UTR accepted! You can place your order.</span>';
+      } else {
+        help.textContent = 'Find UTR in your UPI app under payment history after paying to 9075798377';
+      }
+    }
+
+    function copyUpiId() {
+      const upiId = document.getElementById('upiIdText').textContent;
+      navigator.clipboard.writeText(upiId).then(() => {
+        showToast('✅ UPI ID copied: ' + upiId, 'success');
+      }).catch(() => {
+        // fallback
+        const el = document.createElement('textarea');
+        el.value = upiId;
+        document.body.appendChild(el);
+        el.select();
+        document.execCommand('copy');
+        document.body.removeChild(el);
+        showToast('✅ UPI ID copied!', 'success');
+      });
+    }
+
+    function showAddAddressForm() { document.getElementById('addAddressForm').style.display = 'block'; }
+    function hideAddressForm() { document.getElementById('addAddressForm').style.display = 'none'; }
+
+    async function saveAddress() {
+      const data = {
+        label: 'Home', full_name: document.getElementById('addrName').value,
+        phone: document.getElementById('addrPhone').value, address_line1: document.getElementById('addrLine1').value,
+        address_line2: document.getElementById('addrLine2').value, city: document.getElementById('addrCity').value,
+        state: document.getElementById('addrState').value, pincode: document.getElementById('addrPincode').value,
+        is_default: true
+      };
+      if (!data.full_name || !data.phone || !data.address_line1 || !data.city || !data.state || !data.pincode) {
+        return showToast('Please fill all required fields', 'error');
+      }
+      const { ok, data: r } = await api.post('/auth/addresses', data);
+      if (ok && r.success) { showToast('Address saved!', 'success'); hideAddressForm(); await loadAddresses(); }
+      else showToast(r.message || 'Failed to save address', 'error');
+    }
+
+    async function placeOrder() {
+      if (!selectedAddressId) return showToast('Please select a delivery address', 'warning');
+
+      // ── Payment validation for non-COD ──
+      if (selectedPayment === 'upi') {
+        const utr = document.getElementById('utrInput')?.value.trim();
+        if (!utr || utr.length < 6) {
+          document.getElementById('upiDetailsBox').classList.add('visible');
+          document.getElementById('utrInput').focus();
+          document.getElementById('utrInput').style.borderColor = 'var(--error)';
+          return showToast('⚠️ Please enter your UPI UTR / Transaction ID to confirm payment', 'warning');
+        }
+        document.getElementById('utrInput').style.borderColor = '';
+      }
+      if (selectedPayment === 'card') {
+        return showToast('💳 Card payment: Please complete payment at the counter or contact us on 9075798377', 'warning');
+      }
+      if (selectedPayment === 'netbanking') {
+        return showToast('🏦 Net Banking: Please transfer to account and contact us on 9075798377 with reference number', 'warning');
+      }
+
+      const btn = document.getElementById('placeOrderBtn');
+      btn.disabled = true;
+      btn.innerHTML = '⏳ Placing Order...';
+
+      // Attach UTR to notes if UPI
+      const utr = selectedPayment === 'upi' ? document.getElementById('utrInput')?.value.trim() : null;
+      const baseNotes = document.getElementById('orderNotes').value;
+      const notes = utr ? `[UPI UTR: ${utr}] ${baseNotes}` : baseNotes;
+
+      const { ok, data } = await api.post('/orders/place', {
+        address_id: selectedAddressId,
+        payment_method: selectedPayment,
+        coupon_code: couponCode,
+        notes
+      });
+      if (ok && data.success) {
+        showToast('🎉 Order placed successfully!', 'success');
+        setTimeout(() => window.location.href = `orders.html?success=${data.order_number}`, 1500);
+      } else {
+        btn.disabled = false;
+        btn.innerHTML = selectedPayment === 'upi' ? '✅ Confirm & Place Order' : '🎉 Place Order (Pay on Delivery)';
+        showToast(data.message || 'Failed to place order', 'error');
+      }
+    }
+  </script>
+</body>
+</html>
