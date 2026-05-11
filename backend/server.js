@@ -12,7 +12,26 @@ const PORT = process.env.PORT || 3000;
 initializeDatabase();
 
 // Middleware
-app.use(cors({ origin: '*', credentials: true }));
+const allowedOrigins = [
+  'http://localhost:3000',
+  'http://localhost:5500',
+  'http://127.0.0.1:5500',
+  'https://freshvegapp-kendre.web.app',
+  'https://freshvegapp-kendre.firebaseapp.com',
+];
+app.use(cors({
+  origin: function (origin, callback) {
+    // Allow requests with no origin (mobile apps, curl, Postman)
+    if (!origin) return callback(null, true);
+    if (allowedOrigins.includes(origin)) return callback(null, true);
+    // Allow any origin in development
+    if (process.env.NODE_ENV !== 'production') return callback(null, true);
+    return callback(null, true); // Allow all for now
+  },
+  credentials: false,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+}));
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true }));
 app.use(morgan('dev'));

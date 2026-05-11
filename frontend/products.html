@@ -224,7 +224,12 @@
       const { ok, data } = await api.get(`/products?${params}`);
 
       if (!ok || !data.products) {
-        grid.innerHTML = '<div class="empty-state"><div class="empty-icon">🥦</div><h3 class="empty-title">No products found</h3><p class="empty-desc">Try adjusting your filters</p></div>';
+        grid.innerHTML = `<div class="empty-state">
+          <div class="empty-icon">🥦</div>
+          <h3 class="empty-title">Connecting to server...</h3>
+          <p class="empty-desc">${data?.message || 'Server is waking up. This may take 30 seconds on first load.'}</p>
+          <button class="btn btn-primary" onclick="loadProducts()" style="margin-top:16px">🔄 Retry</button>
+        </div>`;
         return;
       }
 

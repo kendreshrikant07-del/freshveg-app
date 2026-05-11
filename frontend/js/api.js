@@ -5,8 +5,29 @@ const API_BASE = window.location.hostname === 'localhost' || window.location.hos
   ? 'http://localhost:3000/api'
   : 'https://freshveg-app.onrender.com/api';
 
+// Show a wake-up banner when server is starting
+function showWakeUpBanner() {
+  let banner = document.getElementById('wakeup-banner');
+  if (!banner) {
+    banner = document.createElement('div');
+    banner.id = 'wakeup-banner';
+    banner.style.cssText = `
+      position:fixed;bottom:20px;left:50%;transform:translateX(-50%);
+      background:#1a7f37;color:white;padding:12px 24px;border-radius:50px;
+      font-size:14px;font-weight:600;z-index:9999;box-shadow:0 4px 20px rgba(0,0,0,0.3);
+      display:flex;align-items:center;gap:10px;
+    `;
+    banner.innerHTML = `<span style="font-size:20px">🥦</span> Server is waking up... Please wait (30s)`;
+    document.body.appendChild(banner);
+  }
+}
+function hideWakeUpBanner() {
+  const banner = document.getElementById('wakeup-banner');
+  if (banner) banner.remove();
+}
+
 const api = {
-  async request(method, endpoint, data = null) {
+  async request(method, endpoint, data = null, retries = 2) {
     const token = localStorage.getItem('fv_token');
     const opts = {
       method,
@@ -16,12 +37,25 @@ const api = {
     if (data && method !== 'GET') opts.body = JSON.stringify(data);
 
     const url = endpoint.startsWith('http') ? endpoint : `${API_BASE}${endpoint}`;
-    try {
-      const res = await fetch(url, opts);
-      const json = await res.json();
-      return { ok: res.ok, status: res.status, data: json };
-    } catch (err) {
-      return { ok: false, status: 0, data: { success: false, message: 'Network error. Please check server.' } };
+
+    for (let attempt = 0; attempt <= retries; attempt++) {
+      try {
+        if (attempt > 0) showWakeUpBanner();
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 55000); // 55s timeout
+        const res = await fetch(url, { ...opts, signal: controller.signal });
+        clearTimeout(timeoutId);
+        hideWakeUpBanner();
+        const json = await res.json();
+        return { ok: res.ok, status: res.status, data: json };
+      } catch (err) {
+        if (attempt < retries) {
+          await new Promise(r => setTimeout(r, 3000)); // wait 3s before retry
+          continue;
+        }
+        hideWakeUpBanner();
+        return { ok: false, status: 0, data: { success: false, message: 'Server is starting up. Please refresh in 30 seconds.' } };
+      }
     }
   },
 
