@@ -1,9 +1,10 @@
 /* ============================================================
    API Client - Centralized fetch wrapper
    ============================================================ */
-const API_BASE = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+const RENDER_URL = 'https://freshveg-app.onrender.com';
+const API_BASE = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
   ? 'http://localhost:3000/api'
-  : 'https://freshveg-app.onrender.com/api';
+  : `${RENDER_URL}/api`;
 
 // Show a wake-up banner when server is starting
 function showWakeUpBanner() {
